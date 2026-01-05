@@ -1,104 +1,843 @@
-# AdonisJS + React Full-Stack Starter Kit
+# My Awesome App
 
-## Introduction
+🚀 Современное полнофункциональное веб-приложение на AdonisJS + React
 
-A modern, production-ready full-stack web application starter kit built with the latest technologies for those who want to ship fast and ship great.
+## 📋 Содержание
 
-Designed for developers who value both speed and quality, this template provides a complete foundation for full-stack applications. From solo projects to team collaborations, it scales with your ambitions while maintaining the developer experience you deserve.
+- [Описание](#описание)
+- [Технологический стек](#технологический-стек)
+- [Требования](#требования)
+- [Установка](#установка)
+- [Разработка](#разработка)
+- [Структура проекта](#структура-проекта)
+- [Архитектура](#архитектура)
+- [База данных](#база-данных)
+- [Аутентификация](#аутентификация)
+- [Система тем](#-система-тем-darklight-mode)
+- [Команды](#команды)
+- [Развертывание](#развертывание)
+- [Roadmap](#roadmap)
 
-<img width="500" height="360" alt="login-1" src="https://github.com/user-attachments/assets/c344ffe2-0b93-47b3-82ae-85f07c8e28c0" />
-<img width="500" height="360" alt="register-1" src="https://github.com/user-attachments/assets/603f7ef2-73fd-4cee-905e-b416a2238142" />
+## 📝 Описание
 
+Полнофункциональный стартовый набор для создания современных веб-приложений с использованием:
 
+- **Backend**: AdonisJS 6.19.0 (Node.js фреймворк)
+- **Frontend**: React 19 с TypeScript
+- **Связь**: Inertia.js для бесшовной интеграции frontend и backend
+- **UI**: ShadCN UI компоненты на базе Radix UI
+- **Стили**: Tailwind CSS 4
 
-## Quick Start
+Проект использует монолитную архитектуру с разделением на backend и frontend, что обеспечивает единую кодовую базу и упрощает разработку.
 
-### 1. Create Your Project
+## 🛠 Технологический стек
 
-[Generate a new repository](https://github.com/wsameer/adonisjs-react-starter-kit/generate) from this template, then clone it locally:
+### Backend
+
+- **AdonisJS 6.19.0** - Node.js фреймворк с TypeScript
+- **PostgreSQL** - Реляционная база данных через Lucid ORM
+- **VineJS** - Валидация данных
+- **Session Auth** - Аутентификация на основе сессий с Remember Me
+
+### Frontend
+
+- **React 19** - UI библиотека с современными возможностями
+- **TypeScript** - Статическая типизация
+- **Inertia.js** - Связь между React и AdonisJS
+- **ShadCN UI** - Компоненты на базе Radix UI
+- **Tailwind CSS 4** - Utility-first CSS фреймворк
+- **next-themes** - Управление темами (dark/light)
+
+### Инструменты разработки
+
+- **Vite** - Сборщик с HMR и SSR поддержкой
+- **ESLint + Prettier** - Качество кода и форматирование
+- **Husky + lint-staged** - Pre-commit хуки
+- **SWC** - Быстрая компиляция TypeScript
+
+## ✅ Требования
+
+- **Node.js** 18+
+- **PostgreSQL** 12+
+- **pnpm** 8+ (или npm/yarn)
+
+## 🚀 Установка
+
+### 1. Клонирование репозитория
 
 ```bash
-git  clone  https://github.com/YOUR_USERNAME/YOUR_PROJECT_NAME.git
-
-cd  YOUR_PROJECT_NAME
+git clone <repository-url>
+cd my-awesome-app
 ```
 
-### 2. Install Dependencies
+### 2. Установка зависимостей
 
 ```bash
-pnpm  install | yarn install | npm install
+pnpm install
 ```
 
-### 3. Environment Setup
-
-1. Create Environment File
+### 3. Настройка окружения
 
 ```bash
-cp  .env.example  .env
+# Создать файл .env из примера
+cp .env.example .env
+
+# Сгенерировать ключ приложения
+node ace generate:key
 ```
 
-2. Generate Application Key
+### 4. Настройка базы данных
+
+Отредактируйте `.env` файл с настройками PostgreSQL:
+
+```env
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_USER=your_user
+DB_PASSWORD=your_password
+DB_DATABASE=your_database
+```
+
+Создайте базу данных:
 
 ```bash
-node  ace  generate:key
+# Создать пользователя и базу данных (если нужно)
+psql -U postgres -c "CREATE USER your_user WITH PASSWORD 'your_password';"
+psql -U postgres -c "ALTER USER your_user WITH CREATEDB;"
+psql -U postgres -c "CREATE DATABASE your_database OWNER your_user;"
 ```
 
-### 4. Database Setup
-
-1. Run Migrations
+Выполните миграции:
 
 ```bash
-ace  migration:run
+node ace migration:run
 ```
 
-### 5. Start Development
-
-Open a terminal and run the following command:
+### 5. Запуск сервера разработки
 
 ```bash
-pn dev
+pnpm dev
 ```
 
-Visit [localhost:3333](http://localhost:3333) and both your frontend and backend will be running together.
+Приложение будет доступно по адресу: http://localhost:3333
 
-## Technology Stack
+## 💻 Разработка
 
-**Frontend & UI**
+### Структура файлов
 
-- [React 19](https://react.dev/) - Latest React with concurrent features
+```
+my-awesome-app/
+├── app/                    # Backend (AdonisJS)
+│   ├── controllers/        # Контроллеры
+│   ├── models/             # Модели (Lucid ORM)
+│   ├── middleware/         # Middleware
+│   ├── validators/         # Валидаторы (VineJS)
+│   └── exceptions/         # Обработчики исключений
+├── database/
+│   └── migrations/         # Миграции базы данных
+├── resources/
+│   ├── js/                 # Frontend (React)
+│   │   ├── app/            # Точка входа Inertia
+│   │   ├── pages/          # Inertia страницы
+│   │   ├── components/     # React компоненты
+│   │   │   ├── ui/         # ShadCN UI компоненты
+│   │   │   ├── layout/     # Layout компоненты
+│   │   │   └── ...
+│   │   ├── lib/            # Утилиты и константы
+│   │   └── types/          # TypeScript типы
+│   ├── css/                # Стили
+│   └── views/              # Edge шаблоны (SSR)
+├── config/                 # Конфигурация AdonisJS
+├── start/                  # Стартовые файлы (routes, kernel)
+└── shared/                 # Общие типы для backend и frontend
+```
 
-- [TypeScript](https://www.typescriptlang.org/) - Static type checking
+### Основные концепции
 
-- [Tailwind CSS 4](https://tailwindcss.com/) - Utility-first CSS framework
+#### Inertia.js
 
-- [ShadCN UI](https://ui.shadcn.com/) - Beautiful, accessible components
+Inertia связывает AdonisJS backend с React frontend без необходимости создания REST API. Запросы выполняются как обычные формы, но ответы рендерятся через React компоненты.
 
-- [Vite](https://vite.dev/) - Fast build tool and dev server
+**Пример контроллера:**
 
-- [Inertia.js](https://inertiajs.com/) - Modern monolithic approach
+```typescript
+async create({ inertia }: HttpContext) {
+  return inertia.render('dashboard', {
+    data: await getData()
+  })
+}
+```
 
-**Backend & API**
+**Пример React страницы:**
 
-- [AdonisJS](https://docs.adonisjs.com/guides/preface/introduction) - Node.js framework with TypeScript-first approach
+```typescript
+export default function Dashboard({ data }: PageProps<{ data: any }>) {
+  return <div>{data}</div>
+}
+```
 
-- [PostgreSQL](https://www.postgresql.org/) - Robust relational database
+#### Маршрутизация
 
-- [Session-based Authentication](https://docs.adonisjs.com/guides/authentication/session-guard) - Secure user authentication
+Маршруты определяются в `start/routes.ts`:
 
-**Development Tools**
+```typescript
+// Публичный маршрут
+router.on('/').renderInertia('welcome')
 
-- [pnpm](https://pnpm.io/) - Fast, disk space efficient package manager
+// Защищенный маршрут
+router
+  .group(() => {
+    router.on('/dashboard').renderInertia('dashboard')
+  })
+  .use([middleware.auth()])
+```
 
-- Monorepo - Single repository for frontend and backend
+#### Middleware
 
-- [TypeScript](https://www.typescriptlang.org/) - Full type safety across the stack
+- **auth** - Требует аутентификации, перенаправляет на `/login`
+- **guest** - Только для неавторизованных, перенаправляет на `/` если авторизован
 
-- [ESLint](https://eslint.org/) & [Prettier](https://prettier.io/) - Code quality and formatting
+### Создание нового функционала
 
-## Prerequisites
+#### 1. Создание страницы
 
-- Node.js 18+
+```bash
+# Создать React страницу
+touch resources/js/pages/my-page.tsx
+```
 
-- PostgreSQL 12+
+```typescript
+import { PageLayout } from '@/components/layout/page-layout'
 
-- pnpm 8+ (can be swapped with npm or yarn)
+export default function MyPage() {
+  return (
+    <PageLayout pageTitle="Моя страница">
+      <div>Контент</div>
+    </PageLayout>
+  )
+}
+```
+
+Добавить маршрут в `start/routes.ts`:
+
+```typescript
+router.on('/my-page').renderInertia('my-page').as('my-page')
+```
+
+#### 2. Создание контроллера
+
+```bash
+node ace make:controller MyController
+```
+
+#### 3. Создание модели и миграции
+
+```bash
+# Создать модель
+node ace make:model Post
+
+# Создать миграцию
+node ace make:migration create_posts_table
+```
+
+#### 4. Добавление валидации
+
+Создать файл в `app/validators/`:
+
+```typescript
+import vine from '@vinejs/vine'
+
+export const postSchema = vine.object({
+  title: vine.string().minLength(3),
+  content: vine.string().minLength(10),
+})
+
+export const createPostValidator = vine.compile(postSchema)
+```
+
+## 🏗 Архитектура
+
+### Backend (AdonisJS)
+
+**Слои:**
+
+1. **Routes** (`start/routes.ts`) - Определение маршрутов
+2. **Middleware** - Обработка запросов (auth, validation, etc.)
+3. **Controllers** - Бизнес-логика
+4. **Models** - Работа с БД через Lucid ORM
+5. **Validators** - Валидация входящих данных
+
+**Поток запроса:**
+
+```
+HTTP Request → Middleware → Controller → Model → Database
+                                      ↓
+                                  Response (Inertia)
+```
+
+### Frontend (React + Inertia)
+
+**Структура:**
+
+1. **App Wrapper** - Провайдеры (Theme, ErrorBoundary)
+2. **Pages** - Inertia страницы (компоненты верхнего уровня)
+3. **Layouts** - Обертки страниц (AuthLayout, PageLayout)
+4. **Components** - Переиспользуемые компоненты
+5. **UI Components** - ShadCN компоненты
+
+**Поток рендеринга:**
+
+```
+Inertia Response → Page Component → Layout → UI Components
+```
+
+### Общие данные (Shared Props)
+
+Данные, доступные на всех страницах через Inertia:
+
+- `auth.isAuthenticated` - Статус аутентификации
+- `user` - Данные текущего пользователя (или null)
+- `flash.success` - Сообщения об успехе
+- `flash.errors` - Ошибки валидации
+- `sidebarOpen` - Состояние sidebar
+
+Настраивается в `app/middleware/inertia_middleware.ts`.
+
+## 🎨 Система тем (Dark/Light Mode)
+
+Проект поддерживает переключение между темной и светлой темами с автоматическим определением системных предпочтений.
+
+### Как это работает
+
+Система тем использует комбинацию React Context, CSS переменных и Tailwind CSS для бесшовного переключения тем.
+
+#### 1. ThemeProvider (React Context)
+
+`ThemeProvider` (`resources/js/features/theme/theme-provider.tsx`) управляет состоянием темы:
+
+```typescript
+// Доступные темы
+Themes = {
+  dark: 'dark', // Темная тема
+  light: 'light', // Светлая тема
+  system: 'system', // Следовать системным настройкам
+}
+```
+
+**Принцип работы:**
+
+- При инициализации читает сохраненную тему из `localStorage` (ключ: `vite-ui-theme`)
+- При изменении темы добавляет/удаляет класс `dark` или `light` на элементе `<html>`
+- Для темы `system` определяет системные настройки через `prefers-color-scheme`
+- Сохраняет выбор пользователя в `localStorage` для сохранения между сессиями
+
+**Использование в компонентах:**
+
+```typescript
+import { useTheme } from '@/features/theme/theme-provider'
+
+function MyComponent() {
+  const { theme, setTheme } = useTheme()
+
+  return (
+    <button onClick={() => setTheme('dark')}>
+      Включить темную тему
+    </button>
+  )
+}
+```
+
+#### 2. CSS переменные (Цветовая палитра)
+
+Все цвета определены через CSS переменные в `resources/css/app.css`:
+
+```css
+/* Светлая тема (:root) */
+:root {
+  --background: oklch(1 0 0); /* Белый фон */
+  --foreground: oklch(0.145 0 0); /* Темный текст */
+  --primary: oklch(0.205 0 0);
+  /* ... другие цвета */
+}
+
+/* Темная тема (.dark) */
+.dark {
+  --background: oklch(0.145 0 0); /* Темный фон */
+  --foreground: oklch(0.985 0 0); /* Светлый текст */
+  --primary: oklch(0.985 0 0);
+  /* ... другие цвета */
+}
+```
+
+**Преимущества:**
+
+- Все цвета централизованы в одном месте
+- Легко изменить палитру - просто измените значения переменных
+- Использование `oklch()` для более точного управления цветом
+- Автоматическое переключение при добавлении/удалении класса `.dark`
+
+#### 3. Tailwind CSS интеграция
+
+В `tailwind.config.cjs` настроен классовый режим темной темы:
+
+```javascript
+darkMode: ['class'],  // Используем класс .dark вместо media query
+```
+
+Цвета Tailwind привязаны к CSS переменным:
+
+```javascript
+colors: {
+  background: 'hsl(var(--background))',
+  foreground: 'hsl(var(--foreground))',
+  // ... другие цвета
+}
+```
+
+**Использование в компонентах:**
+
+```tsx
+// Автоматически адаптируется к теме
+<div className="bg-background text-foreground">
+  Контент
+</div>
+
+// Явное указание для темной темы (опционально)
+<div className="dark:bg-slate-800">
+  Только в темной теме
+</div>
+```
+
+#### 4. Поток переключения темы
+
+```
+1. Пользователь выбирает тему (Light/Dark/System)
+        ↓
+2. ThemeProvider.setTheme() вызывается
+        ↓
+3. Значение сохраняется в localStorage
+        ↓
+4. useEffect в ThemeProvider срабатывает
+        ↓
+5. Класс 'dark' или 'light' добавляется к <html>
+        ↓
+6. CSS переменные переключаются (.dark { --background: ... })
+        ↓
+7. Tailwind классы используют новые значения переменных
+        ↓
+8. Все компоненты автоматически перерисовываются с новыми цветами
+```
+
+#### 5. Страница настроек темы
+
+Страница `/settings/appearance` (`resources/js/pages/settings/appearance.tsx`) предоставляет UI для переключения:
+
+- **RadioGroup** с тремя опциями: Light, Dark, System
+- Использует `useTheme()` hook для получения/установки темы
+- Отображает иконки для каждой опции
+
+#### 6. Настройка ThemeProvider
+
+Подключается в корне приложения через `AppWrapper`:
+
+```tsx
+// resources/js/app/app-wrapper.tsx
+<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+  {children}
+</ThemeProvider>
+```
+
+**Параметры:**
+
+- `defaultTheme` - Тема по умолчанию (используется при первом запуске)
+- `storageKey` - Ключ для сохранения в localStorage
+
+### Добавление новых цветов
+
+1. Добавьте CSS переменную в `resources/css/app.css`:
+
+```css
+:root {
+  --my-color: oklch(0.5 0.2 200);
+}
+
+.dark {
+  --my-color: oklch(0.7 0.2 200);
+}
+```
+
+2. Добавьте в `tailwind.config.cjs`:
+
+```javascript
+colors: {
+  'my-color': 'hsl(var(--my-color))',
+}
+```
+
+3. Используйте в компонентах:
+
+```tsx
+<div className="bg-my-color">Цвет адаптируется к теме</div>
+```
+
+### Лучшие практики
+
+- ✅ Используйте CSS переменные для всех цветов (не хардкодьте)
+- ✅ Используйте семантические имена (`background`, `foreground`, `primary`)
+- ✅ Тестируйте компоненты в обеих темах
+- ✅ Для специальных случаев используйте `dark:` префикс в Tailwind
+- ✅ Не забывайте про контрастность текста в обеих темах
+
+## 🗄 База данных
+
+### Текущие таблицы
+
+1. **users**
+   - `id` - Primary key
+   - `name` - Имя (nullable)
+   - `email` - Email (unique)
+   - `password` - Хеш пароля
+   - `created_at`, `updated_at`
+
+2. **remember_me_tokens**
+   - `id` - Primary key
+   - `tokenable_id` - FK на users
+   - `hash` - Хеш токена
+   - `created_at`, `updated_at`, `expires_at`
+
+### Миграции
+
+```bash
+# Создать миграцию
+node ace make:migration migration_name
+
+# Выполнить миграции
+node ace migration:run
+
+# Откатить последнюю миграцию
+node ace migration:rollback
+
+# Откатить все миграции
+node ace migration:rollback --batch=0
+```
+
+### Работа с моделями
+
+```typescript
+import User from '#models/user'
+
+// Создать
+const user = await User.create({
+  name: 'John',
+  email: 'john@example.com',
+  password: 'password',
+})
+
+// Найти
+const user = await User.find(1)
+const users = await User.all()
+
+// Обновить
+user.name = 'Jane'
+await user.save()
+
+// Удалить
+await user.delete()
+```
+
+## 🔐 Аутентификация
+
+### Текущая реализация
+
+- **Session-based** аутентификация
+- **Remember Me** токены (срок действия: 1 год)
+- Автоматическое хеширование паролей через scrypt
+
+### Маршруты
+
+- `GET /login` - Страница входа
+- `POST /api/auth/login` - Вход (только для гостей)
+- `GET /register` - Страница регистрации
+- `POST /api/auth/register` - Регистрация (только для гостей)
+- `POST /api/auth/logout` - Выход (требует auth)
+
+### Использование в коде
+
+**Backend:**
+
+```typescript
+// Проверка аутентификации
+await auth.use('web').authenticate()
+
+// Получение пользователя
+const user = auth.user!
+
+// Вход
+await auth.use('web').login(user, true) // true = remember me
+
+// Выход
+await auth.use('web').logout()
+```
+
+**Frontend:**
+
+```typescript
+// Доступ к данным пользователя
+const { user, auth } = usePage<SharedProps>().props
+
+if (auth.isAuthenticated && user) {
+  console.log(user.name, user.email)
+}
+```
+
+## 📜 Команды
+
+### Разработка
+
+```bash
+# Запуск сервера разработки с HMR
+pnpm dev
+
+# Сборка для продакшена
+pnpm build
+
+# Запуск продакшен сервера
+pnpm start
+
+# Preview продакшен сборки
+pnpm preview
+```
+
+### Код
+
+```bash
+# Линтинг
+pnpm lint
+
+# Исправление ошибок линтинга
+pnpm lint:fix
+
+# Форматирование
+pnpm format
+
+# Проверка типов TypeScript
+pnpm typecheck
+
+# Все проверки
+pnpm check-all
+```
+
+### База данных
+
+```bash
+# Выполнить миграции
+node ace migration:run
+
+# Откатить миграции
+node ace migration:rollback
+
+# Показать статус миграций
+node ace migration:status
+```
+
+### Генерация кода
+
+```bash
+# Контроллер
+node ace make:controller ControllerName
+
+# Модель
+node ace make:model ModelName
+
+# Миграция
+node ace make:migration migration_name
+
+# Middleware
+node ace make:middleware MiddlewareName
+
+# Validator
+node ace make:validator ValidatorName
+```
+
+### Тестирование
+
+```bash
+# Запустить все тесты
+pnpm test
+
+# Тесты через ACE
+node ace test
+```
+
+### Документация
+
+```bash
+# Запуск VitePress документации
+pnpm docs:dev
+
+# Сборка документации
+pnpm docs:build
+
+# Preview документации
+pnpm docs:preview
+```
+
+## 🌐 Развертывание
+
+### Подготовка к продакшену
+
+1. Установите переменные окружения:
+
+   ```env
+   NODE_ENV=production
+   APP_KEY=your_generated_key
+   ```
+
+2. Соберите приложение:
+
+   ```bash
+   pnpm build
+   ```
+
+3. Выполните миграции:
+
+   ```bash
+   node ace migration:run
+   ```
+
+4. Запустите сервер:
+   ```bash
+   pnpm start
+   ```
+
+### Переменные окружения
+
+Основные переменные в `.env`:
+
+```env
+# App
+NODE_ENV=development
+PORT=3333
+HOST=0.0.0.0
+APP_KEY=
+
+# Database
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_USER=root
+DB_PASSWORD=password
+DB_DATABASE=adonisjs_react_starter_kit_db
+
+# Session
+SESSION_DRIVER=cookie
+
+# Logging
+LOG_LEVEL=info
+```
+
+## 🗺 Roadmap
+
+### Текущий статус
+
+✅ **Реализовано:**
+
+- Базовая аутентификация (login/register/logout)
+- Session-based auth с Remember Me
+- База данных настроена
+- Основные страницы (welcome, dashboard, settings)
+- Темная/светлая тема
+- Адаптивный sidebar
+- SSR для основных страниц
+
+🔄 **В разработке:**
+
+- Настройки профиля (функциональность сохранения)
+- Страница безопасности
+
+📋 **Запланировано:**
+
+- [ ] OAuth интеграция (Google, Apple)
+- [ ] Восстановление пароля
+- [ ] Email верификация
+- [ ] Двухфакторная аутентификация
+- [ ] API endpoints
+- [ ] tRPC интеграция для типобезопасного API
+- [ ] Расширение функционала dashboard
+- [ ] Тестирование (unit + functional)
+- [ ] CI/CD настройка
+- [ ] Документация API
+
+### Приоритеты разработки
+
+1. **Фаза 1: Основной функционал**
+   - Завершение настроек профиля
+   - Базовая функциональность dashboard
+   - Улучшение UX
+
+2. **Фаза 2: Безопасность**
+   - OAuth интеграция
+   - Восстановление пароля
+   - Email верификация
+
+3. **Фаза 3: Расширение**
+   - API endpoints
+   - tRPC интеграция
+   - Дополнительные функции
+
+## 🤝 Участие в разработке
+
+### Workflow
+
+1. Создайте ветку от `main`:
+
+   ```bash
+   git checkout -b feature/my-feature
+   ```
+
+2. Внесите изменения и закоммитьте:
+
+   ```bash
+   git add .
+   git commit -m "feat: добавлена новая функция"
+   ```
+
+3. Запушьте и создайте Pull Request
+
+### Commit сообщения
+
+Используйте conventional commits:
+
+- `feat:` - Новая функция
+- `fix:` - Исправление бага
+- `docs:` - Документация
+- `style:` - Форматирование
+- `refactor:` - Рефакторинг
+- `test:` - Тесты
+- `chore:` - Обновление зависимостей и т.д.
+
+### Code Style
+
+- TypeScript strict mode
+- ESLint правила применяются автоматически
+- Prettier форматирование
+- Pre-commit хуки через Husky
+
+## 📚 Дополнительные ресурсы
+
+- [Документация AdonisJS](https://docs.adonisjs.com/)
+- [Документация Inertia.js](https://inertiajs.com/)
+- [Документация React](https://react.dev/)
+- [ShadCN UI](https://ui.shadcn.com/)
+- [Tailwind CSS](https://tailwindcss.com/)
+
+## 📝 Лицензия
+
+MIT
+
+## 👥 Авторы
+
+- Проект начат с [AdonisJS + React Starter Kit](https://github.com/wsameer/adonisjs-react-starter-kit)
+
+---
+
+**Примечание**: Этот проект находится в активной разработке. API может изменяться без предупреждения до первой стабильной версии.

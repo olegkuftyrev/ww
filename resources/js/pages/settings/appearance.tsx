@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator'
 import { useTheme, type Theme as ThemeType, Themes } from '@/features/theme/theme-provider'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { type BreadcrumbItem } from '@/types'
-import { MonitorIcon, MoonIcon, PaletteIcon, SunIcon } from 'lucide-react'
+import { MoonIcon, PaletteIcon, SparklesIcon, SunIcon } from 'lucide-react'
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -61,13 +61,13 @@ const AppearancePage = () => {
                   </Label>
                 </div>
                 <div className="flex cursor-pointer items-center space-x-2 rounded-lg border p-3 hover:bg-accent">
-                  <RadioGroupItem value={Themes.system} id={Themes.system} />
+                  <RadioGroupItem value={Themes['iron-man']} id={Themes['iron-man']} />
                   <Label
-                    htmlFor={Themes.system}
+                    htmlFor={Themes['iron-man']}
                     className="flex cursor-pointer items-center gap-2 text-sm"
                   >
-                    {!isMobile && <MonitorIcon className="h-4 w-4" />}
-                    System
+                    {!isMobile && <SparklesIcon className="h-4 w-4" />}
+                    Iron Man
                   </Label>
                 </div>
               </RadioGroup>

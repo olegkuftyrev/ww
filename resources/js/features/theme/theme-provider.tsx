@@ -4,9 +4,10 @@ import { createContext, useContext, useEffect, useState } from 'react'
 export type Theme = (typeof Themes)[keyof typeof Themes]
 
 export const Themes = {
-  dark: 'dark',
-  light: 'light',
-  system: 'system',
+  'dark': 'dark',
+  'light': 'light',
+  'system': 'system',
+  'iron-man': 'iron-man',
 } as const
 
 type ThemeProviderProps = {
@@ -43,7 +44,7 @@ export function ThemeProvider({
   useEffect(() => {
     const root = window.document.documentElement
 
-    root.classList.remove('light', 'dark')
+    root.classList.remove('light', 'dark', 'iron-man')
 
     if (theme === 'system') {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches

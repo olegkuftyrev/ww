@@ -14,7 +14,7 @@ export default class RegisteredUsersController {
   /**
    * Handle an incoming registration request.
    */
-  async store({ request, auth, response }: HttpContext) {
+  async store({ request, auth, response, session }: HttpContext) {
     try {
       // Validate request data
       const data = await request.validateUsing(createUserValidator)
@@ -29,21 +29,21 @@ export default class RegisteredUsersController {
       // Login user
       await auth.use('web').login(user, !!request.input('remember_me'))
 
+      session.flash('success', 'Account created successfully!')
+
       return response.redirect().toRoute('dashboard')
     } catch (error) {
       if (error instanceof errors.E_VALIDATION_ERROR) {
-        return response.badRequest({
-          status: 'error',
-          errors: error.messages,
-          message: 'Validation failed',
-        })
+        // Flash errors for Inertia to display
+        session.flash('errors', error.messages)
+        return response.redirect().back()
       }
 
       // Handle unexpected errors
-      return response.internalServerError({
-        status: 'error',
-        message: 'Something went wrong',
+      session.flash('errors', {
+        email: 'Something went wrong. Please try again.',
       })
+      return response.redirect().back()
     }
   }
 }
