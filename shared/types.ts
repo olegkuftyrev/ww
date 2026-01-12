@@ -4,6 +4,11 @@ export interface User {
   email: string
   role?: 'associate' | 'manager' | 'admin'
   theme?: 'dark' | 'light' | 'system' | 'iron-man'
+  status?: 'active' | 'inactive'
+  stores?: Array<{
+    id: number
+    number: string
+  }>
 }
 
 export interface AuthData {

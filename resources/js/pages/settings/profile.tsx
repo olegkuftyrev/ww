@@ -88,66 +88,69 @@ const ProfilePage = () => {
     <PageLayout breadcrumbs={breadcrumbs} pageTitle="Profile settings">
       <SettingsLayout>
         <section className="w-full space-y-8 lg:w-3/4">
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            <div className="space-y-1">
-              <Label className="text-lg font-medium">Profile</Label>
-              <p className="text-sm text-muted-foreground">Set your account details</p>
-            </div>
-            <div className="md:col-span-2">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-xs text-muted-foreground">
-                    Full Name
-                  </Label>
-                  <Input
-                    id="name"
-                    placeholder="John Doe"
-                    value={data.name}
-                    onChange={(e) => setData('name', e.target.value)}
-                    onBlur={() => handleBlur('name')}
-                    disabled={processing}
-                  />
-                  <InputError message={errors?.name} />
-                </div>
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="email"
-                    className="text-xs text-muted-foreground flex items-center gap-1.5"
-                  >
-                    <Lock className="h-3 w-3" />
-                    Email address
-                  </Label>
-                  <Input
-                    type="email"
-                    id="email"
-                    placeholder="user@email.com"
-                    value={data.email}
-                    disabled={true}
-                    readOnly
-                  />
-                  <InputError message={errors?.email} />
-                </div>
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="role"
-                    className="text-xs text-muted-foreground flex items-center gap-1.5"
-                  >
-                    <Lock className="h-3 w-3" />
-                    Role
-                  </Label>
-                  <Select value={data.role} disabled={true}>
-                    <SelectTrigger id="role" className="w-full">
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="associate">Associate</SelectItem>
-                      <SelectItem value="manager">Manager</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <InputError message={errors?.role} />
-                </div>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Status</Label>
+              <div className="flex items-center gap-2">
+                <div
+                  className={`h-2 w-2 rounded-full ${
+                    user?.status === 'active' ? 'bg-green-500' : 'bg-gray-400'
+                  }`}
+                />
+                <span className="text-sm font-medium capitalize">{user?.status || 'active'}</span>
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-xs text-muted-foreground">
+                Full Name
+              </Label>
+              <Input
+                id="name"
+                placeholder="John Doe"
+                value={data.name}
+                onChange={(e) => setData('name', e.target.value)}
+                onBlur={() => handleBlur('name')}
+                disabled={processing}
+              />
+              <InputError message={errors?.name} />
+            </div>
+            <div className="space-y-2">
+              <Label
+                htmlFor="email"
+                className="text-xs text-muted-foreground flex items-center gap-1.5"
+              >
+                <Lock className="h-3 w-3" />
+                Email address
+              </Label>
+              <Input
+                type="email"
+                id="email"
+                placeholder="user@email.com"
+                value={data.email}
+                disabled={true}
+                readOnly
+              />
+              <InputError message={errors?.email} />
+            </div>
+            <div className="space-y-2">
+              <Label
+                htmlFor="role"
+                className="text-xs text-muted-foreground flex items-center gap-1.5"
+              >
+                <Lock className="h-3 w-3" />
+                Role
+              </Label>
+              <Select value={data.role} disabled={true}>
+                <SelectTrigger id="role" className="w-full">
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="associate">Associate</SelectItem>
+                  <SelectItem value="manager">Manager</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+              <InputError message={errors?.role} />
             </div>
           </div>
         </section>

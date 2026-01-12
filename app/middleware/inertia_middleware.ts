@@ -11,16 +11,25 @@ export default class InertiaMiddleware {
         isAuthenticated: auth.isAuthenticated,
       },
 
-      user: (ctx: HttpContext) =>
-        ctx.auth?.user
-          ? {
-              id: ctx.auth.user.id,
-              name: ctx.auth.user.name,
-              email: ctx.auth.user.email,
-              role: ctx.auth.user.role,
-              theme: ctx.auth.user.theme,
-            }
-          : null,
+      user: async (ctx: HttpContext) => {
+        if (!ctx.auth?.user) return null
+
+        // Load user's stores
+        await ctx.auth.user.load('stores')
+
+        return {
+          id: ctx.auth.user.id,
+          name: ctx.auth.user.name,
+          email: ctx.auth.user.email,
+          role: ctx.auth.user.role,
+          theme: ctx.auth.user.theme,
+          status: ctx.auth.user.status,
+          stores: ctx.auth.user.stores.map((store) => ({
+            id: store.id,
+            number: store.number,
+          })),
+        }
+      },
 
       // You can share other global data here too
       flash: (ctx: HttpContext) => ({

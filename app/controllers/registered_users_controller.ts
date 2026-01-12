@@ -31,7 +31,16 @@ export default class RegisteredUsersController {
 
       session.flash('success', 'Account created successfully!')
 
-      return response.redirect().toRoute('dashboard')
+      // Redirect to first store dashboard, or stores index if admin with no stores
+      await user.load('stores')
+      if (user.stores.length > 0) {
+        return response.redirect(`/stores/${user.stores[0].id}`)
+      }
+      // If admin, redirect to stores index; otherwise, just redirect back (no stores assigned)
+      if (user.role === 'admin') {
+        return response.redirect('/stores')
+      }
+      return response.redirect('/')
     } catch (error) {
       if (error instanceof errors.E_VALIDATION_ERROR) {
         // Flash errors for Inertia to display

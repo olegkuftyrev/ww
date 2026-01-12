@@ -20,4 +20,5 @@ export interface NavItem {
   icon?: LucideIcon | null
   type: 'internal' | 'external'
   isActive?: boolean
+  adminOnly?: boolean
 }

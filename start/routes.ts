@@ -12,6 +12,8 @@ import router from '@adonisjs/core/services/router'
 import { middleware } from './kernel.js'
 const RegisteredUsersController = () => import('#controllers/registered_users_controller')
 const ProfileController = () => import('#controllers/profile_controller')
+const UsersController = () => import('#controllers/users_controller')
+const StoresController = () => import('#controllers/stores_controller')
 
 // Web routes
 router.on('/').renderInertia('welcome').as('home')
@@ -22,9 +24,33 @@ router.group(() => {
 
 router
   .group(() => {
-    router.on('/dashboard').renderInertia('dashboard').as('dashboard')
+    router.get('/stores/:id', [StoresController, 'show']).as('stores.show')
   })
   .use([middleware.auth()])
+
+router
+  .group(() => {
+    router.get('/users', [UsersController, 'index']).as('users.index')
+    router.get('/users/create', [UsersController, 'create']).as('users.create')
+    router.post('/users', [UsersController, 'store']).as('users.store')
+    router.get('/users/:id/edit', [UsersController, 'edit']).as('users.edit')
+    router.put('/users/:id', [UsersController, 'update']).as('users.update')
+  })
+  .use([middleware.auth(), middleware.ensureAdmin()])
+
+router
+  .group(() => {
+    router.get('/stores', [StoresController, 'index']).as('stores.index')
+    router.get('/stores/create', [StoresController, 'create']).as('stores.create')
+    router.post('/stores', [StoresController, 'store']).as('stores.store')
+    router.get('/stores/:id/edit', [StoresController, 'edit']).as('stores.edit')
+    router.put('/stores/:id', [StoresController, 'update']).as('stores.update')
+    router.post('/stores/:id/users', [StoresController, 'attachUser']).as('stores.attachUser')
+    router
+      .post('/stores/:id/users/remove', [StoresController, 'detachUser'])
+      .as('stores.detachUser')
+  })
+  .use([middleware.auth(), middleware.ensureAdmin()])
 
 router
   .group(() => {

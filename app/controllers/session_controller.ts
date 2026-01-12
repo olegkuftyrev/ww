@@ -29,7 +29,16 @@ export default class SessionController {
       // Flash success message
       session.flash('success', 'Welcome back!')
 
-      return response.redirect('/dashboard')
+      // Redirect to first store dashboard, or stores index if admin with no stores
+      await user.load('stores')
+      if (user.stores.length > 0) {
+        return response.redirect(`/stores/${user.stores[0].id}`)
+      }
+      // If admin, redirect to stores index; otherwise, just redirect back (no stores assigned)
+      if (user.role === 'admin') {
+        return response.redirect('/stores')
+      }
+      return response.redirect('/')
     } catch (error) {
       // Handle validation errors (automatically handled by Inertia)
       if (error instanceof errors.E_INVALID_CREDENTIALS) {
