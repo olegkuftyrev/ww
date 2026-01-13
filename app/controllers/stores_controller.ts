@@ -593,17 +593,20 @@ export default class StoresController {
       })
 
       // Update the week value(s)
-      if (data.w1 !== undefined) product.w1 = data.w1
-      if (data.w2 !== undefined) product.w2 = data.w2
-      if (data.w3 !== undefined) product.w3 = data.w3
-      if (data.w4 !== undefined) product.w4 = data.w4
+      if (data.w1 !== undefined) product.w1 = this.parseDecimal(data.w1?.toString())
+      if (data.w2 !== undefined) product.w2 = this.parseDecimal(data.w2?.toString())
+      if (data.w3 !== undefined) product.w3 = this.parseDecimal(data.w3?.toString())
+      if (data.w4 !== undefined) product.w4 = this.parseDecimal(data.w4?.toString())
 
       // Recalculate average
       const weekValues = [product.w1, product.w2, product.w3, product.w4].filter(
-        (v) => v !== null
+        (v) => v !== null && v !== undefined
       ) as number[]
+
       if (weekValues.length > 0) {
         product.average = weekValues.reduce((sum, val) => sum + val, 0) / weekValues.length
+      } else {
+        product.average = null
       }
 
       await product.save()
@@ -611,19 +614,11 @@ export default class StoresController {
       logger.info('Product week value updated', {
         productId: product.id,
         newAverage: product.average,
+        weekValues,
       })
 
-      return response.ok({
-        message: 'Product updated successfully',
-        product: {
-          id: product.id,
-          w1: product.w1,
-          w2: product.w2,
-          w3: product.w3,
-          w4: product.w4,
-          average: product.average,
-        },
-      })
+      // Return empty response for Inertia (toast will show on frontend)
+      return response.noContent()
     } catch (error: any) {
       logger.error('Error updating product week value', {
         error: error.message,

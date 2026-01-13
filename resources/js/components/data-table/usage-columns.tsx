@@ -45,6 +45,8 @@ function EditableWeekCell({ initialValue, productId, weekField, storeId }: Edita
 
     const numericValue = value ? parseFloat(value) : null
 
+    const toastId = toast.loading('Saving...')
+
     router.patch(
       `/stores/${storeId}/usage/products/${productId}`,
       {
@@ -52,14 +54,15 @@ function EditableWeekCell({ initialValue, productId, weekField, storeId }: Edita
       },
       {
         preserveScroll: true,
-        preserveState: true,
         onSuccess: () => {
-          toast.success('Week value updated successfully!')
+          toast.success('Value updated! Average recalculated.', { id: toastId })
           setIsEditing(false)
         },
         onError: (errors) => {
-          toast.error('Failed to update value')
+          toast.error('Failed to update value', { id: toastId })
           console.error(errors)
+          setValue(initialValue?.toString() || '')
+          setIsEditing(false)
         },
       }
     )
