@@ -34,6 +34,9 @@ export default class UsageProduct extends BaseModel {
   @column()
   declare average: number | null
 
+  @column()
+  declare conversion: number | null
+
   @column.dateTime({ autoCreate: true, columnName: 'created_at' })
   declare createdAt: DateTime
 

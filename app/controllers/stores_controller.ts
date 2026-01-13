@@ -109,6 +109,7 @@ export default class StoresController {
             w3: product.w3,
             w4: product.w4,
             average: product.average,
+            conversion: product.conversion,
           })),
         })),
       }

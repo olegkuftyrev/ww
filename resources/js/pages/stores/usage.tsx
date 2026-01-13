@@ -1,14 +1,6 @@
 import { PageLayout } from '@/components/layout/page-layout'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { PdfDropzone } from '@/components/common/pdf-dropzone'
 import { type BreadcrumbItem, type PageProps } from '@/types'
 import { usePage, router } from '@inertiajs/react'
@@ -16,6 +8,9 @@ import { parsePdf, type ParsedPdfData } from '@/lib/pdf-parser'
 import { LoaderCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import * as React from 'react'
+import { UsageDataTable } from '@/components/data-table/usage-data-table'
+import { usageColumns } from '@/components/data-table/usage-columns'
+import { Separator } from '@/components/ui/separator'
 
 type ExistingUsageData = {
   uploadedAt: string
@@ -30,6 +25,7 @@ type ExistingUsageData = {
       w3: number | null
       w4: number | null
       average: number | null
+      conversion: number | null
     }[]
   }[]
 }
@@ -141,63 +137,24 @@ const StoreUsagePage = () => {
               </p>
             </div>
 
-            <div className="rounded-lg border bg-card p-6">
-              <div className="space-y-6">
-                {existingData.categories.map((category, categoryIndex) => (
-                  <div key={categoryIndex} className="space-y-2">
-                    <Label className="text-lg font-semibold">{category.name}</Label>
-                    {category.products.length > 0 ? (
-                      <div className="rounded-lg border">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Product Number</TableHead>
-                              <TableHead>Product</TableHead>
-                              <TableHead>Unit</TableHead>
-                              <TableHead>W1</TableHead>
-                              <TableHead>W2</TableHead>
-                              <TableHead>W3</TableHead>
-                              <TableHead>W4</TableHead>
-                              <TableHead>Average</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {category.products.map((product, productIndex) => (
-                              <TableRow key={productIndex}>
-                                <TableCell className="font-medium">
-                                  {product.productNumber}
-                                </TableCell>
-                                <TableCell>{product.productName}</TableCell>
-                                <TableCell>{product.unit}</TableCell>
-                                <TableCell>
-                                  {product.w1 != null ? Number(product.w1).toFixed(2) : '—'}
-                                </TableCell>
-                                <TableCell>
-                                  {product.w2 != null ? Number(product.w2).toFixed(2) : '—'}
-                                </TableCell>
-                                <TableCell>
-                                  {product.w3 != null ? Number(product.w3).toFixed(2) : '—'}
-                                </TableCell>
-                                <TableCell>
-                                  {product.w4 != null ? Number(product.w4).toFixed(2) : '—'}
-                                </TableCell>
-                                <TableCell>
-                                  {product.average != null
-                                    ? Number(product.average).toFixed(2)
-                                    : '—'}
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground p-4">No products found</p>
-                    )}
-                  </div>
-                ))}
+            {existingData.categories.map((category, categoryIndex) => (
+              <div key={categoryIndex} className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <Label className="text-xl font-semibold">{category.name}</Label>
+                  <span className="text-sm text-muted-foreground">
+                    {category.products.length} products
+                  </span>
+                </div>
+                {category.products.length > 0 ? (
+                  <UsageDataTable columns={usageColumns} data={category.products} />
+                ) : (
+                  <p className="text-sm text-muted-foreground p-4">No products found</p>
+                )}
+                {categoryIndex < existingData.categories.length - 1 && (
+                  <Separator className="my-6" />
+                )}
               </div>
-            </div>
+            ))}
           </div>
         )}
 
