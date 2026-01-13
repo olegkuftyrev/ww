@@ -7,37 +7,37 @@ export default class UsageProduct extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
-  @column()
+  @column({ columnName: 'usage_category_id' })
   declare usageCategoryId: number
 
-  @column()
+  @column({ columnName: 'product_number' })
   declare productNumber: string
 
-  @column()
+  @column({ columnName: 'product_name' })
   declare productName: string
 
   @column()
   declare unit: string
 
-  @column()
+  @column({ columnName: 'w1' })
   declare w1: number | null
 
-  @column()
+  @column({ columnName: 'w2' })
   declare w2: number | null
 
-  @column()
+  @column({ columnName: 'w3' })
   declare w3: number | null
 
-  @column()
+  @column({ columnName: 'w4' })
   declare w4: number | null
 
   @column()
   declare average: number | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'created_at' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
   declare updatedAt: DateTime | null
 
   @belongsTo(() => UsageCategory)

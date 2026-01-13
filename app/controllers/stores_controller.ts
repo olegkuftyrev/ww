@@ -12,6 +12,32 @@ import db from '@adonisjs/lucid/services/db'
 
 export default class StoresController {
   /**
+   * Safely parse a string to a float, handling edge cases
+   */
+  private parseDecimal(value: string | null | undefined): number | null {
+    if (!value) return null
+    if (typeof value === 'string') {
+      // Trim whitespace
+      const trimmed = value.trim()
+      if (trimmed === '' || trimmed === '-' || trimmed === '—') return null
+
+      // Remove commas and other formatting
+      const cleaned = trimmed.replace(/,/g, '')
+
+      // Try to parse
+      const parsed = Number.parseFloat(cleaned)
+
+      // Check if valid number
+      if (Number.isNaN(parsed) || !Number.isFinite(parsed)) {
+        return null
+      }
+
+      return parsed
+    }
+    return null
+  }
+
+  /**
    * Display a store dashboard (for users assigned to the store)
    */
   async show({ params, inertia, auth, response }: HttpContext) {
@@ -59,11 +85,41 @@ export default class StoresController {
       }
     }
 
+    // Load existing usage data
+    const usageEntry = await UsageEntry.query()
+      .where('store_id', store.id)
+      .preload('categories', (query) => {
+        query.preload('products')
+      })
+      .orderBy('uploaded_at', 'desc')
+      .first()
+
+    let existingData = null
+    if (usageEntry) {
+      existingData = {
+        uploadedAt: usageEntry.uploadedAt.toISO(),
+        categories: usageEntry.categories.map((category) => ({
+          name: category.name,
+          products: category.products.map((product) => ({
+            productNumber: product.productNumber,
+            productName: product.productName,
+            unit: product.unit,
+            w1: product.w1,
+            w2: product.w2,
+            w3: product.w3,
+            w4: product.w4,
+            average: product.average,
+          })),
+        })),
+      }
+    }
+
     return inertia.render('stores/usage', {
       store: {
         id: store.id,
         number: store.number,
       },
+      existingData,
     })
   }
 
@@ -175,20 +231,31 @@ export default class StoresController {
               categoryId: category.id,
             })
 
-            const product = await UsageProduct.create(
-              {
-                usageCategoryId: category.id,
-                productNumber: productData.productNumber,
-                productName: productData.product,
-                unit: productData.unit,
-                w1: productData.weeks.w1 ? Number.parseFloat(productData.weeks.w1) : null,
-                w2: productData.weeks.w2 ? Number.parseFloat(productData.weeks.w2) : null,
-                w3: productData.weeks.w3 ? Number.parseFloat(productData.weeks.w3) : null,
-                w4: productData.weeks.w4 ? Number.parseFloat(productData.weeks.w4) : null,
-                average: productData.average ? Number.parseFloat(productData.average) : null,
-              },
-              { client: trx }
-            )
+            // Prepare product data with validation and safe parsing
+            const productPayload = {
+              usageCategoryId: category.id,
+              productNumber: productData.productNumber,
+              productName: productData.product,
+              unit: productData.unit,
+              w1: this.parseDecimal(productData.weeks.w1),
+              w2: this.parseDecimal(productData.weeks.w2),
+              w3: this.parseDecimal(productData.weeks.w3),
+              w4: this.parseDecimal(productData.weeks.w4),
+              average: this.parseDecimal(productData.average),
+            }
+
+            logger.info('Product payload prepared', {
+              productIndex,
+              payload: productPayload,
+              rawWeeks: productData.weeks,
+              rawAverage: productData.average,
+            })
+
+            console.log('=== CREATING PRODUCT ===')
+            console.log('Product data from request:', JSON.stringify(productData, null, 2))
+            console.log('Product payload to insert:', JSON.stringify(productPayload, null, 2))
+
+            const product = await UsageProduct.create(productPayload, { client: trx })
             logger.info('Product created', {
               productId: product.id,
               productNumber: product.productNumber,
@@ -205,10 +272,20 @@ export default class StoresController {
       } catch (transactionError: any) {
         logger.error('Transaction error occurred', {
           error: transactionError.message,
+          errorMessage: String(transactionError),
           stack: transactionError.stack,
           errorType: transactionError.constructor.name,
+          errorDetails: JSON.stringify(transactionError, null, 2),
           storeId: store.id,
         })
+        console.error('=== DETAILED TRANSACTION ERROR ===')
+        console.error('Error:', transactionError)
+        console.error('Message:', transactionError.message)
+        console.error('Stack:', transactionError.stack)
+        console.error(
+          'Full error object:',
+          JSON.stringify(transactionError, Object.getOwnPropertyNames(transactionError), 2)
+        )
         await trx.rollback()
         logger.info('Transaction rolled back')
         throw transactionError
@@ -226,6 +303,11 @@ export default class StoresController {
         storeId: store.id,
       })
 
+      console.error('=== FINAL ERROR HANDLER ===')
+      console.error('Error:', error)
+      console.error('Error type:', error.constructor?.name)
+      console.error('Error message:', error.message)
+
       if (error instanceof errors.E_VALIDATION_ERROR) {
         logger.error('Validation errors occurred', { errors: error.messages })
         session.flash('errors', error.messages)
@@ -233,6 +315,16 @@ export default class StoresController {
       }
 
       logger.error('Non-validation error occurred', { error: error.message })
+      console.error('Non-validation error - full details:', {
+        message: error.message,
+        code: error.code,
+        detail: error.detail,
+        hint: error.hint,
+        constraint: error.constraint,
+        table: error.table,
+        column: error.column,
+      })
+
       session.flash('errors', {
         general: error.message || 'Something went wrong. Please try again.',
       })

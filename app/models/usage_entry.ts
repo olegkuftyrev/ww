@@ -8,16 +8,16 @@ export default class UsageEntry extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
-  @column()
+  @column({ columnName: 'store_id' })
   declare storeId: number
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'uploaded_at' })
   declare uploadedAt: DateTime
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'created_at' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
   declare updatedAt: DateTime | null
 
   @belongsTo(() => Store)

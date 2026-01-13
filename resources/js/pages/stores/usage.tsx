@@ -17,15 +17,33 @@ import { LoaderCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import * as React from 'react'
 
+type ExistingUsageData = {
+  uploadedAt: string
+  categories: {
+    name: string
+    products: {
+      productNumber: string
+      productName: string
+      unit: string
+      w1: number | null
+      w2: number | null
+      w3: number | null
+      w4: number | null
+      average: number | null
+    }[]
+  }[]
+}
+
 type StoreUsagePageProps = PageProps & {
   store: {
     id: number
     number: string
   }
+  existingData: ExistingUsageData | null
 }
 
 const StoreUsagePage = () => {
-  const { store } = usePage<StoreUsagePageProps>().props
+  const { store, existingData } = usePage<StoreUsagePageProps>().props
   const [isParsing, setIsParsing] = React.useState(false)
   const [parsedData, setParsedData] = React.useState<ParsedPdfData | null>(null)
 
@@ -110,11 +128,87 @@ const StoreUsagePage = () => {
           </p>
         </div>
 
+        {existingData && (
+          <div className="space-y-4">
+            <div>
+              <Label className="text-2xl font-semibold">Current Usage Data</Label>
+              <p className="text-sm text-muted-foreground mt-1">
+                Last uploaded:{' '}
+                {new Date(existingData.uploadedAt).toLocaleString('en-US', {
+                  dateStyle: 'medium',
+                  timeStyle: 'short',
+                })}
+              </p>
+            </div>
+
+            <div className="rounded-lg border bg-card p-6">
+              <div className="space-y-6">
+                {existingData.categories.map((category, categoryIndex) => (
+                  <div key={categoryIndex} className="space-y-2">
+                    <Label className="text-lg font-semibold">{category.name}</Label>
+                    {category.products.length > 0 ? (
+                      <div className="rounded-lg border">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Product Number</TableHead>
+                              <TableHead>Product</TableHead>
+                              <TableHead>Unit</TableHead>
+                              <TableHead>W1</TableHead>
+                              <TableHead>W2</TableHead>
+                              <TableHead>W3</TableHead>
+                              <TableHead>W4</TableHead>
+                              <TableHead>Average</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {category.products.map((product, productIndex) => (
+                              <TableRow key={productIndex}>
+                                <TableCell className="font-medium">
+                                  {product.productNumber}
+                                </TableCell>
+                                <TableCell>{product.productName}</TableCell>
+                                <TableCell>{product.unit}</TableCell>
+                                <TableCell>
+                                  {product.w1 != null ? Number(product.w1).toFixed(2) : '—'}
+                                </TableCell>
+                                <TableCell>
+                                  {product.w2 != null ? Number(product.w2).toFixed(2) : '—'}
+                                </TableCell>
+                                <TableCell>
+                                  {product.w3 != null ? Number(product.w3).toFixed(2) : '—'}
+                                </TableCell>
+                                <TableCell>
+                                  {product.w4 != null ? Number(product.w4).toFixed(2) : '—'}
+                                </TableCell>
+                                <TableCell>
+                                  {product.average != null
+                                    ? Number(product.average).toFixed(2)
+                                    : '—'}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground p-4">No products found</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="space-y-4">
           <div>
-            <Label className="text-lg font-semibold">Upload PDF</Label>
+            <Label className="text-2xl font-semibold">
+              {existingData ? 'Upload New Usage Data' : 'Upload Usage Data'}
+            </Label>
             <p className="text-sm text-muted-foreground mt-1">
               Upload a PDF file to parse and review before sending to database
+              {existingData && ' (This will replace the existing data)'}
             </p>
           </div>
           <PdfDropzone onFileSelect={handleFileSelect} disabled={isParsing} />
