@@ -1,4 +1,5 @@
 import * as pdfjsLib from 'pdfjs-dist'
+import { getConversion } from './conversion-data'
 
 // Set up the worker for PDF.js
 // Using local worker file from public directory (no CDN dependency)
@@ -27,6 +28,7 @@ export interface PdfProduct {
     w4?: string
   }
   average: string
+  conversion?: string
 }
 
 export async function parsePdf(file: File): Promise<ParsedPdfData> {
@@ -102,9 +104,10 @@ function parsePdfText(text: string): ParsedPdfData {
       // Remove trailing K- if it's part of the product name pattern
       productName = productName.replace(/\s+K-\s*$/, '').trim()
 
+      const productNumber = match[1].trim()
       allProducts.push({
         product: {
-          productNumber: match[1].trim(),
+          productNumber,
           product: productName,
           unit: match[3].trim(),
           weeks: {
@@ -114,6 +117,7 @@ function parsePdfText(text: string): ParsedPdfData {
             w4: match[7].trim().replace(/[()]/g, ''),
           },
           average: match[8].trim(),
+          conversion: getConversion(productNumber).toString(),
         },
         position: match.index,
       })

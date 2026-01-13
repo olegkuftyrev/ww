@@ -243,6 +243,7 @@ export default class StoresController {
               w3: this.parseDecimal(productData.weeks.w3),
               w4: this.parseDecimal(productData.weeks.w4),
               average: this.parseDecimal(productData.average),
+              conversion: this.parseDecimal((productData as any).conversion),
             }
 
             logger.info('Product payload prepared', {

@@ -20,6 +20,7 @@ export const storeUsageValidator = vine.compile(
               w4: vine.string().nullable().optional(),
             }),
             average: vine.string().nullable().optional(),
+            conversion: vine.string().nullable().optional(),
           })
         ),
       })

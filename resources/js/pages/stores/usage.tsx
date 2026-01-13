@@ -95,6 +95,7 @@ const StoreUsagePage = () => {
             w4: product.weeks.w4 || null,
           },
           average: product.average || null,
+          conversion: product.conversion || null,
         })),
       })),
     }

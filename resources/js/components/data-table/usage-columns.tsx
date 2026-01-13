@@ -16,15 +16,17 @@ export type UsageProduct = {
 }
 
 function ConversionCell({ initialValue }: { initialValue: number | null }) {
-  const [value, setValue] = React.useState<string>(initialValue?.toString() || '1')
+  const value = initialValue?.toString() || '1'
 
   return (
     <Input
       type="number"
       step="0.01"
       value={value}
-      onChange={(e) => setValue(e.target.value)}
-      className="h-8 w-20 text-right"
+      readOnly
+      disabled
+      className="h-8 w-20 text-right cursor-not-allowed bg-muted"
+      title="Conversion factor is predefined for this product"
     />
   )
 }
