@@ -135,4 +135,23 @@ export const usageColumns: ColumnDef<UsageProduct>[] = [
       )
     },
   },
+  {
+    id: 'volumeMultiplier',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Volume Multiplier" className="justify-end" />
+    ),
+    cell: ({ row }) => {
+      const average = row.getValue<number | null>('average')
+      const conversion = row.original.conversion
+      const avgNum = average != null ? Number(average) : null
+      const convNum = conversion != null ? Number(conversion) : null
+      const csPer1k = avgNum && convNum && convNum > 0 ? avgNum / convNum : null
+      const volumeMultiplier = csPer1k != null ? csPer1k * 10 : null
+      return (
+        <div className="text-right font-medium text-xs">
+          {volumeMultiplier != null ? volumeMultiplier.toFixed(2) : '—'}
+        </div>
+      )
+    },
+  },
 ]
