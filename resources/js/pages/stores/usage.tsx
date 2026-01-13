@@ -13,7 +13,8 @@ import { createUsageColumns } from '@/components/data-table/usage-columns'
 import { Separator } from '@/components/ui/separator'
 import { ColumnVisibilityToggle } from '@/components/ui/column-visibility-toggle'
 import { Input } from '@/components/ui/input'
-import { Search } from 'lucide-react'
+import { Search, AlertCircle, AlertTriangle, CheckCircle } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
 
 type ExistingUsageData = {
   uploadedAt: string
@@ -142,6 +143,53 @@ const StoreUsagePage = () => {
 
         {existingData && (
           <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="border-l-4 border-l-red-600 bg-red-50/50">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
+                    <div>
+                      <h3 className="font-semibold text-sm text-red-900">Critical Variance</h3>
+                      <p className="text-xs text-red-700 mt-1">Difference &gt; 3 between weeks</p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Requires immediate attention - major usage fluctuation detected
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-l-4 border-l-yellow-600 bg-yellow-50/50">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                    <div>
+                      <h3 className="font-semibold text-sm text-yellow-900">Moderate Variance</h3>
+                      <p className="text-xs text-yellow-700 mt-1">Difference 1-3 between weeks</p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Worth monitoring - some inconsistency in usage
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-l-4 border-l-green-600 bg-green-50/50">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                    <div>
+                      <h3 className="font-semibold text-sm text-green-900">Consistent Usage</h3>
+                      <p className="text-xs text-green-700 mt-1">Difference ≤ 1 between weeks</p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Stable and predictable - no action needed
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <Label className="text-2xl font-semibold">Current Usage Data</Label>
