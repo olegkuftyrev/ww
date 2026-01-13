@@ -2,8 +2,11 @@ import { type ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
 import { Input } from '@/components/ui/input'
 import * as React from 'react'
+import { router } from '@inertiajs/react'
+import { toast } from 'sonner'
 
 export type UsageProduct = {
+  id?: number
   productNumber: string
   productName: string
   unit: string
@@ -13,6 +16,88 @@ export type UsageProduct = {
   w4: number | null
   average: number | null
   conversion: number | null
+}
+
+interface EditableWeekCellProps {
+  initialValue: number | null
+  productId: number
+  weekField: 'w1' | 'w2' | 'w3' | 'w4'
+  storeId: number
+}
+
+function EditableWeekCell({ initialValue, productId, weekField, storeId }: EditableWeekCellProps) {
+  const [isEditing, setIsEditing] = React.useState(false)
+  const [value, setValue] = React.useState(initialValue?.toString() || '')
+  const inputRef = React.useRef<HTMLInputElement>(null)
+
+  React.useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus()
+      inputRef.current.select()
+    }
+  }, [isEditing])
+
+  const handleSave = async () => {
+    if (value === initialValue?.toString()) {
+      setIsEditing(false)
+      return
+    }
+
+    const numericValue = value ? parseFloat(value) : null
+
+    router.patch(
+      `/stores/${storeId}/usage/products/${productId}`,
+      {
+        [weekField]: numericValue,
+      },
+      {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: () => {
+          toast.success('Week value updated successfully!')
+          setIsEditing(false)
+        },
+        onError: (errors) => {
+          toast.error('Failed to update value')
+          console.error(errors)
+        },
+      }
+    )
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSave()
+    } else if (e.key === 'Escape') {
+      setValue(initialValue?.toString() || '')
+      setIsEditing(false)
+    }
+  }
+
+  if (isEditing) {
+    return (
+      <Input
+        ref={inputRef}
+        type="number"
+        step="0.01"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={handleSave}
+        onKeyDown={handleKeyDown}
+        className="h-7 w-20 text-right text-xs"
+      />
+    )
+  }
+
+  return (
+    <div
+      className="text-right text-xs cursor-pointer hover:bg-muted/50 px-2 py-1 rounded"
+      onDoubleClick={() => setIsEditing(true)}
+      title="Double-click to edit"
+    >
+      {initialValue != null ? Number(initialValue).toFixed(2) : '—'}
+    </div>
+  )
 }
 
 function ConversionCell({ initialValue }: { initialValue: number | null }) {
@@ -31,7 +116,10 @@ function ConversionCell({ initialValue }: { initialValue: number | null }) {
   )
 }
 
-export const createUsageColumns = (multiplier: number): ColumnDef<UsageProduct>[] => [
+export const createUsageColumns = (
+  multiplier: number,
+  storeId: number
+): ColumnDef<UsageProduct>[] => [
   {
     accessorKey: 'productNumber',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Product #" />,
@@ -62,8 +150,19 @@ export const createUsageColumns = (multiplier: number): ColumnDef<UsageProduct>[
     ),
     cell: ({ row }) => {
       const value = row.getValue<number | null>('w1')
+      const productId = row.original.id
+      if (!productId) {
+        return (
+          <div className="text-right text-xs">{value != null ? Number(value).toFixed(2) : '—'}</div>
+        )
+      }
       return (
-        <div className="text-right text-xs">{value != null ? Number(value).toFixed(2) : '—'}</div>
+        <EditableWeekCell
+          initialValue={value}
+          productId={productId}
+          weekField="w1"
+          storeId={storeId}
+        />
       )
     },
   },
@@ -74,8 +173,19 @@ export const createUsageColumns = (multiplier: number): ColumnDef<UsageProduct>[
     ),
     cell: ({ row }) => {
       const value = row.getValue<number | null>('w2')
+      const productId = row.original.id
+      if (!productId) {
+        return (
+          <div className="text-right text-xs">{value != null ? Number(value).toFixed(2) : '—'}</div>
+        )
+      }
       return (
-        <div className="text-right text-xs">{value != null ? Number(value).toFixed(2) : '—'}</div>
+        <EditableWeekCell
+          initialValue={value}
+          productId={productId}
+          weekField="w2"
+          storeId={storeId}
+        />
       )
     },
   },
@@ -86,8 +196,19 @@ export const createUsageColumns = (multiplier: number): ColumnDef<UsageProduct>[
     ),
     cell: ({ row }) => {
       const value = row.getValue<number | null>('w3')
+      const productId = row.original.id
+      if (!productId) {
+        return (
+          <div className="text-right text-xs">{value != null ? Number(value).toFixed(2) : '—'}</div>
+        )
+      }
       return (
-        <div className="text-right text-xs">{value != null ? Number(value).toFixed(2) : '—'}</div>
+        <EditableWeekCell
+          initialValue={value}
+          productId={productId}
+          weekField="w3"
+          storeId={storeId}
+        />
       )
     },
   },
@@ -98,8 +219,19 @@ export const createUsageColumns = (multiplier: number): ColumnDef<UsageProduct>[
     ),
     cell: ({ row }) => {
       const value = row.getValue<number | null>('w4')
+      const productId = row.original.id
+      if (!productId) {
+        return (
+          <div className="text-right text-xs">{value != null ? Number(value).toFixed(2) : '—'}</div>
+        )
+      }
       return (
-        <div className="text-right text-xs">{value != null ? Number(value).toFixed(2) : '—'}</div>
+        <EditableWeekCell
+          initialValue={value}
+          productId={productId}
+          weekField="w4"
+          storeId={storeId}
+        />
       )
     },
   },

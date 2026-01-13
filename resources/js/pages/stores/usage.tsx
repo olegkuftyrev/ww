@@ -245,7 +245,7 @@ const StoreUsagePage = () => {
                     </span>
                   </div>
                   <UsageDataTable
-                    columns={createUsageColumns(multiplier)}
+                    columns={createUsageColumns(multiplier, store.id)}
                     data={filteredProducts}
                     columnVisibility={columnVisibility}
                     onColumnVisibilityChange={setColumnVisibility}

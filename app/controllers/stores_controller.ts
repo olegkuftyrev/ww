@@ -100,6 +100,7 @@ export default class StoresController {
       // Collect all products from all categories
       const allProducts = usageEntry.categories.flatMap((category) =>
         category.products.map((product) => ({
+          id: product.id,
           productNumber: product.productNumber,
           productName: product.productName,
           unit: product.unit,
@@ -568,6 +569,69 @@ export default class StoresController {
         general: error.message || 'Something went wrong. Please try again.',
       })
       return response.redirect().toRoute('stores.edit', { id: params.id })
+    }
+  }
+
+  /**
+   * Update a single product's week value (for variance correction)
+   */
+  async updateProductWeek({ params, request, response, logger }: HttpContext) {
+    try {
+      const product = await UsageProduct.find(params.productId)
+
+      if (!product) {
+        return response.notFound('Product not found')
+      }
+
+      // Get the updated week value(s)
+      const data = request.only(['w1', 'w2', 'w3', 'w4'])
+
+      logger.info('Updating product week value', {
+        productId: params.productId,
+        productNumber: product.productNumber,
+        updates: data,
+      })
+
+      // Update the week value(s)
+      if (data.w1 !== undefined) product.w1 = data.w1
+      if (data.w2 !== undefined) product.w2 = data.w2
+      if (data.w3 !== undefined) product.w3 = data.w3
+      if (data.w4 !== undefined) product.w4 = data.w4
+
+      // Recalculate average
+      const weekValues = [product.w1, product.w2, product.w3, product.w4].filter(
+        (v) => v !== null
+      ) as number[]
+      if (weekValues.length > 0) {
+        product.average = weekValues.reduce((sum, val) => sum + val, 0) / weekValues.length
+      }
+
+      await product.save()
+
+      logger.info('Product week value updated', {
+        productId: product.id,
+        newAverage: product.average,
+      })
+
+      return response.ok({
+        message: 'Product updated successfully',
+        product: {
+          id: product.id,
+          w1: product.w1,
+          w2: product.w2,
+          w3: product.w3,
+          w4: product.w4,
+          average: product.average,
+        },
+      })
+    } catch (error: any) {
+      logger.error('Error updating product week value', {
+        error: error.message,
+        productId: params.productId,
+      })
+      return response.badRequest({
+        message: error.message || 'Failed to update product',
+      })
     }
   }
 
