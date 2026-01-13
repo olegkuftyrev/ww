@@ -27,6 +27,28 @@ interface DataTableProps<TData, TValue> {
   onColumnVisibilityChange?: (visibility: VisibilityState) => void
 }
 
+/**
+ * Calculate variance category for color coding
+ */
+function getVarianceCategory(
+  w1: number | null,
+  w2: number | null,
+  w3: number | null,
+  w4: number | null
+): 'red' | 'yellow' | 'normal' {
+  const values = [w1, w2, w3, w4].filter((v) => v != null) as number[]
+
+  if (values.length === 0) return 'normal'
+
+  const max = Math.max(...values)
+  const min = Math.min(...values)
+  const difference = max - min
+
+  if (difference > 3) return 'red'
+  if (difference > 1) return 'yellow'
+  return 'normal'
+}
+
 export function UsageDataTable<TData, TValue>({
   columns,
   data,
@@ -76,15 +98,32 @@ export function UsageDataTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="p-2">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table.getRowModel().rows.map((row) => {
+                // Get variance category for row coloring
+                const product = row.original as any
+                const variance = getVarianceCategory(product.w1, product.w2, product.w3, product.w4)
+
+                const rowClassName =
+                  variance === 'red'
+                    ? 'bg-red-50 border-l-4 border-l-red-500 hover:bg-red-100'
+                    : variance === 'yellow'
+                      ? 'bg-yellow-50 border-l-4 border-l-yellow-500 hover:bg-yellow-100'
+                      : ''
+
+                return (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && 'selected'}
+                    className={rowClassName}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className="p-2">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                )
+              })
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
