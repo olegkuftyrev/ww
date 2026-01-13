@@ -9,6 +9,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { errors } from '@vinejs/vine'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
+import { getCategoryForProduct, getAllCategories } from '../../shared/product_categories.js'
 
 export default class StoresController {
   /**
@@ -96,22 +97,48 @@ export default class StoresController {
 
     let existingData = null
     if (usageEntry) {
+      // Collect all products from all categories
+      const allProducts = usageEntry.categories.flatMap((category) =>
+        category.products.map((product) => ({
+          productNumber: product.productNumber,
+          productName: product.productName,
+          unit: product.unit,
+          w1: product.w1,
+          w2: product.w2,
+          w3: product.w3,
+          w4: product.w4,
+          average: product.average,
+          conversion: product.conversion,
+        }))
+      )
+
+      // Reorganize products by business categories
+      const categorizedProducts = new Map<string, typeof allProducts>()
+
+      // Initialize all categories
+      for (const categoryName of getAllCategories()) {
+        categorizedProducts.set(categoryName, [])
+      }
+
+      // Assign products to their business categories
+      for (const product of allProducts) {
+        const categoryName = getCategoryForProduct(product.productNumber)
+        const categoryProducts = categorizedProducts.get(categoryName) || []
+        categoryProducts.push(product)
+        categorizedProducts.set(categoryName, categoryProducts)
+      }
+
+      // Build final category structure (only include non-empty categories)
+      const categories = Array.from(categorizedProducts.entries())
+        .filter(([_, products]) => products.length > 0)
+        .map(([name, products]) => ({
+          name,
+          products,
+        }))
+
       existingData = {
         uploadedAt: usageEntry.uploadedAt.toISO(),
-        categories: usageEntry.categories.map((category) => ({
-          name: category.name,
-          products: category.products.map((product) => ({
-            productNumber: product.productNumber,
-            productName: product.productName,
-            unit: product.unit,
-            w1: product.w1,
-            w2: product.w2,
-            w3: product.w3,
-            w4: product.w4,
-            average: product.average,
-            conversion: product.conversion,
-          })),
-        })),
+        categories,
       }
     }
 
