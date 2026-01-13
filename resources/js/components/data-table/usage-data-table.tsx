@@ -11,7 +11,6 @@ import {
   type VisibilityState,
 } from '@tanstack/react-table'
 
-import { Input } from '@/components/ui/input'
 import {
   Table,
   TableBody,
@@ -58,14 +57,6 @@ export function UsageDataTable<TData, TValue>({
 
   return (
     <div className="w-full space-y-4">
-      <div className="flex items-center">
-        <Input
-          placeholder="Filter products..."
-          value={(table.getColumn('productName')?.getFilterValue() as string) ?? ''}
-          onChange={(event) => table.getColumn('productName')?.setFilterValue(event.target.value)}
-          className="max-w-sm"
-        />
-      </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>

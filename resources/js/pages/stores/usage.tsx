@@ -12,6 +12,8 @@ import { UsageDataTable } from '@/components/data-table/usage-data-table'
 import { createUsageColumns } from '@/components/data-table/usage-columns'
 import { Separator } from '@/components/ui/separator'
 import { ColumnVisibilityToggle } from '@/components/ui/column-visibility-toggle'
+import { Input } from '@/components/ui/input'
+import { Search } from 'lucide-react'
 
 type ExistingUsageData = {
   uploadedAt: string
@@ -44,6 +46,7 @@ const StoreUsagePage = () => {
   const [isParsing, setIsParsing] = React.useState(false)
   const [parsedData, setParsedData] = React.useState<ParsedPdfData | null>(null)
   const [multiplier, setMultiplier] = React.useState(10)
+  const [searchQuery, setSearchQuery] = React.useState('')
   const [columnVisibility, setColumnVisibility] = React.useState({
     productNumber: false,
     conversion: false,
@@ -139,8 +142,8 @@ const StoreUsagePage = () => {
 
         {existingData && (
           <div className="space-y-6">
-            <div className="flex items-start justify-between">
-              <div>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
                 <Label className="text-2xl font-semibold">Current Usage Data</Label>
                 <p className="text-sm text-muted-foreground mt-1">
                   Last uploaded:{' '}
@@ -189,29 +192,50 @@ const StoreUsagePage = () => {
               </div>
             </div>
 
-            {existingData.categories.map((category, categoryIndex) => (
-              <div key={categoryIndex} className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <Label className="text-xl font-semibold">{category.name}</Label>
-                  <span className="text-sm text-muted-foreground">
-                    {category.products.length} products
-                  </span>
-                </div>
-                {category.products.length > 0 ? (
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search all products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+
+            {existingData.categories.map((category, categoryIndex) => {
+              // Filter products based on global search
+              const filteredProducts = category.products.filter((product) =>
+                searchQuery === ''
+                  ? true
+                  : product.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    product.productNumber.toLowerCase().includes(searchQuery.toLowerCase())
+              )
+
+              // Skip empty categories after filtering
+              if (filteredProducts.length === 0) return null
+
+              return (
+                <div key={categoryIndex} className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <Label className="text-xl font-semibold">{category.name}</Label>
+                    <span className="text-sm text-muted-foreground">
+                      {filteredProducts.length} products
+                      {searchQuery && category.products.length !== filteredProducts.length && (
+                        <span className="ml-1">(filtered from {category.products.length})</span>
+                      )}
+                    </span>
+                  </div>
                   <UsageDataTable
                     columns={createUsageColumns(multiplier)}
-                    data={category.products}
+                    data={filteredProducts}
                     columnVisibility={columnVisibility}
                     onColumnVisibilityChange={setColumnVisibility}
                   />
-                ) : (
-                  <p className="text-sm text-muted-foreground p-4">No products found</p>
-                )}
-                {categoryIndex < existingData.categories.length - 1 && (
                   <Separator className="my-6" />
-                )}
-              </div>
-            ))}
+                </div>
+              )
+            })}
           </div>
         )}
 
