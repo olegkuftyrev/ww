@@ -1,9 +1,14 @@
 import Store from '#models/store'
 import User from '#models/user'
+import UsageEntry from '#models/usage_entry'
+import UsageCategory from '#models/usage_category'
+import UsageProduct from '#models/usage_product'
 import { createStoreValidator, updateStoreValidator } from '#validators/store'
+import { storeUsageValidator } from '#validators/usage'
 import type { HttpContext } from '@adonisjs/core/http'
 import { errors } from '@vinejs/vine'
 import { DateTime } from 'luxon'
+import db from '@adonisjs/lucid/services/db'
 
 export default class StoresController {
   /**
@@ -32,6 +37,207 @@ export default class StoresController {
         number: store.number,
       },
     })
+  }
+
+  /**
+   * Display 1K Usage page for a store (for users assigned to the store)
+   */
+  async usage({ params, inertia, auth, response }: HttpContext) {
+    const store = await Store.find(params.id)
+
+    if (!store) {
+      return response.notFound('Store not found')
+    }
+
+    // Check if user has access to this store (admin can access all, others only their stores)
+    if (auth.user?.role !== 'admin') {
+      await auth.user!.load('stores')
+      const hasAccess = auth.user!.stores.some((s) => s.id === store.id)
+
+      if (!hasAccess) {
+        return response.unauthorized('You do not have access to this store')
+      }
+    }
+
+    return inertia.render('stores/usage', {
+      store: {
+        id: store.id,
+        number: store.number,
+      },
+    })
+  }
+
+  /**
+   * Store usage data for a store (replaces previous entry)
+   */
+  async storeUsage({ params, request, auth, response, session, logger }: HttpContext) {
+    logger.info('=== storeUsage method called ===', {
+      storeId: params.id,
+      userId: auth.user?.id,
+      userRole: auth.user?.role,
+    })
+
+    const store = await Store.find(params.id)
+    logger.info('Store lookup', { storeId: params.id, found: !!store })
+
+    if (!store) {
+      logger.error('Store not found', { storeId: params.id })
+      return response.notFound('Store not found')
+    }
+
+    logger.info('Store found', { storeId: store.id, storeNumber: store.number })
+
+    // Check if user has access to this store (admin can access all, others only their stores)
+    if (auth.user?.role !== 'admin') {
+      logger.info('Checking user access (non-admin)', { userId: auth.user?.id })
+      await auth.user!.load('stores')
+      const hasAccess = auth.user!.stores.some((s) => s.id === store.id)
+      logger.info('User access check result', {
+        userId: auth.user?.id,
+        hasAccess,
+        userStoreIds: auth.user!.stores.map((s) => s.id),
+      })
+
+      if (!hasAccess) {
+        logger.error('User does not have access to store', {
+          userId: auth.user?.id,
+          storeId: store.id,
+        })
+        return response.unauthorized('You do not have access to this store')
+      }
+    } else {
+      logger.info('Admin user - access granted', { userId: auth.user?.id })
+    }
+
+    try {
+      logger.info('Starting validation', { body: request.body() })
+      const data = await request.validateUsing(storeUsageValidator)
+
+      logger.info('Validation passed', {
+        categoriesCount: data.categories.length,
+        firstCategory: data.categories[0]?.name,
+        firstCategoryProductsCount: data.categories[0]?.products.length,
+        totalCategories: data.categories.length,
+      })
+
+      // Use transaction to ensure data consistency
+      logger.info('Starting database transaction')
+      const trx = await db.transaction()
+      logger.info('Transaction started')
+
+      try {
+        // Delete previous usage entries for this store (Option B: Replace latest entry)
+        // CASCADE will automatically delete related categories and products
+        logger.info('Deleting previous usage entries', { storeId: store.id })
+        const deletedCount = await UsageEntry.query({ client: trx })
+          .where('store_id', store.id)
+          .delete()
+        logger.info('Deleted previous entries', { deletedCount, storeId: store.id })
+
+        // Create new usage entry
+        logger.info('Creating new usage entry', { storeId: store.id })
+        const usageEntry = await UsageEntry.create(
+          {
+            storeId: store.id,
+            uploadedAt: DateTime.now(),
+          },
+          { client: trx }
+        )
+        logger.info('Usage entry created', { usageEntryId: usageEntry.id, storeId: store.id })
+
+        // Create categories and products
+        logger.info('Starting to create categories', { categoriesCount: data.categories.length })
+        for (let categoryIndex = 0; categoryIndex < data.categories.length; categoryIndex++) {
+          const categoryData = data.categories[categoryIndex]
+          logger.info(`Creating category ${categoryIndex + 1}/${data.categories.length}`, {
+            categoryName: categoryData.name,
+            productsCount: categoryData.products.length,
+            usageEntryId: usageEntry.id,
+          })
+
+          const category = await UsageCategory.create(
+            {
+              usageEntryId: usageEntry.id,
+              name: categoryData.name,
+            },
+            { client: trx }
+          )
+          logger.info('Category created', { categoryId: category.id, categoryName: category.name })
+
+          logger.info(`Starting to create products for category: ${category.name}`, {
+            productsCount: categoryData.products.length,
+          })
+          for (let productIndex = 0; productIndex < categoryData.products.length; productIndex++) {
+            const productData = categoryData.products[productIndex]
+            logger.info(`Creating product ${productIndex + 1}/${categoryData.products.length}`, {
+              productNumber: productData.productNumber,
+              productName: productData.product,
+              categoryId: category.id,
+            })
+
+            const product = await UsageProduct.create(
+              {
+                usageCategoryId: category.id,
+                productNumber: productData.productNumber,
+                productName: productData.product,
+                unit: productData.unit,
+                w1: productData.weeks.w1 ? Number.parseFloat(productData.weeks.w1) : null,
+                w2: productData.weeks.w2 ? Number.parseFloat(productData.weeks.w2) : null,
+                w3: productData.weeks.w3 ? Number.parseFloat(productData.weeks.w3) : null,
+                w4: productData.weeks.w4 ? Number.parseFloat(productData.weeks.w4) : null,
+                average: productData.average ? Number.parseFloat(productData.average) : null,
+              },
+              { client: trx }
+            )
+            logger.info('Product created', {
+              productId: product.id,
+              productNumber: product.productNumber,
+              productName: product.productName,
+            })
+          }
+          logger.info(`Finished creating products for category: ${category.name}`)
+        }
+        logger.info('Finished creating all categories and products')
+
+        logger.info('Committing transaction', { storeId: store.id })
+        await trx.commit()
+        logger.info('Transaction committed successfully', { storeId: store.id })
+      } catch (transactionError: any) {
+        logger.error('Transaction error occurred', {
+          error: transactionError.message,
+          stack: transactionError.stack,
+          errorType: transactionError.constructor.name,
+          storeId: store.id,
+        })
+        await trx.rollback()
+        logger.info('Transaction rolled back')
+        throw transactionError
+      }
+
+      logger.info('Setting success flash message')
+      session.flash('success', 'Usage data saved successfully!')
+      logger.info('Redirecting back')
+      return response.redirect().back()
+    } catch (error: any) {
+      logger.error('Error in storeUsage method', {
+        error: error.message,
+        stack: error.stack,
+        errorType: error.constructor.name,
+        storeId: store.id,
+      })
+
+      if (error instanceof errors.E_VALIDATION_ERROR) {
+        logger.error('Validation errors occurred', { errors: error.messages })
+        session.flash('errors', error.messages)
+        return response.redirect().back()
+      }
+
+      logger.error('Non-validation error occurred', { error: error.message })
+      session.flash('errors', {
+        general: error.message || 'Something went wrong. Please try again.',
+      })
+      return response.redirect().back()
+    }
   }
 
   /**

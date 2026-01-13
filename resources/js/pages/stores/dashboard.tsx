@@ -1,7 +1,7 @@
 import { PageLayout } from '@/components/layout/page-layout'
 import { Label } from '@/components/ui/label'
 import { type BreadcrumbItem, type PageProps } from '@/types'
-import { usePage } from '@inertiajs/react'
+import { usePage, Link } from '@inertiajs/react'
 
 type StoreDashboardPageProps = PageProps & {
   store: {
@@ -20,7 +20,11 @@ const StoreDashboardPage = () => {
       <div className="w-full space-y-8 p-4">
         <div>
           <Label className="text-3xl font-bold">Store {store.number} Dashboard</Label>
-          <p className="text-muted-foreground mt-2">Welcome to your store dashboard</p>
+          <p className="text-muted-foreground mt-2">
+            <Link href={`/stores/${store.id}/usage`} className="text-primary hover:underline">
+              1K Usage
+            </Link>
+          </p>
         </div>
       </div>
     </PageLayout>

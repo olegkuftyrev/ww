@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { LifeBuoy, SendIcon, Store, Users } from 'lucide-react'
+import { Store, Users } from 'lucide-react'
 
 import {
   Sidebar,
@@ -29,18 +29,6 @@ const secondaryNavItems: NavItem[] = [
     icon: Store,
     type: 'internal',
     adminOnly: true,
-  },
-  {
-    title: 'Support',
-    href: 'https://github.com/wsameer/adonisjs-react-starter-kit/issues/new',
-    icon: LifeBuoy,
-    type: 'external',
-  },
-  {
-    title: 'Feedback',
-    href: 'mailto:someone@example.com',
-    icon: SendIcon,
-    type: 'external',
   },
 ]
 

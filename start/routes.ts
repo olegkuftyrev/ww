@@ -25,6 +25,8 @@ router.group(() => {
 router
   .group(() => {
     router.get('/stores/:id', [StoresController, 'show']).as('stores.show')
+    router.get('/stores/:id/usage', [StoresController, 'usage']).as('stores.usage')
+    router.post('/stores/:id/usage/store', [StoresController, 'storeUsage']).as('stores.storeUsage')
   })
   .use([middleware.auth()])
 
