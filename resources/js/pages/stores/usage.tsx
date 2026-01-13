@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button'
 import { PdfDropzone } from '@/components/common/pdf-dropzone'
 import { type BreadcrumbItem, type PageProps } from '@/types'
 import { usePage, router } from '@inertiajs/react'
-import { parsePdf, type ParsedPdfData } from '@/lib/pdf-parser'
 import { LoaderCircle } from 'lucide-react'
+import type { ParsedPdfData } from '@/lib/pdf-parser'
 import { toast } from 'sonner'
 import * as React from 'react'
 import { UsageDataTable } from '@/components/data-table/usage-data-table'
@@ -76,6 +76,8 @@ const StoreUsagePage = () => {
     const toastId = toast.loading('Parsing PDF...')
 
     try {
+      // Lazy load PDF parser only on client side to avoid SSR issues
+      const { parsePdf } = await import('@/lib/pdf-parser')
       const data = await parsePdf(file)
       setParsedData(data)
       toast.success('PDF parsed successfully!', { id: toastId })
