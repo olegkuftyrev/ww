@@ -45,7 +45,7 @@ const StoreUsagePage = () => {
   const { store, existingData } = usePage<StoreUsagePageProps>().props
   const [isParsing, setIsParsing] = React.useState(false)
   const [parsedData, setParsedData] = React.useState<ParsedPdfData | null>(null)
-  const [multiplier, setMultiplier] = React.useState(10)
+  const [multiplier, setMultiplier] = React.useState(12)
   const [searchQuery, setSearchQuery] = React.useState('')
   const [columnVisibility, setColumnVisibility] = React.useState({
     productNumber: false,
