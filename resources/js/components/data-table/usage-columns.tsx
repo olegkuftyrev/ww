@@ -31,7 +31,7 @@ function ConversionCell({ initialValue }: { initialValue: number | null }) {
   )
 }
 
-export const usageColumns: ColumnDef<UsageProduct>[] = [
+export const createUsageColumns = (multiplier: number): ColumnDef<UsageProduct>[] => [
   {
     accessorKey: 'productNumber',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Product #" />,
@@ -146,7 +146,7 @@ export const usageColumns: ColumnDef<UsageProduct>[] = [
       const avgNum = average != null ? Number(average) : null
       const convNum = conversion != null ? Number(conversion) : null
       const csPer1k = avgNum && convNum && convNum > 0 ? avgNum / convNum : null
-      const volumeMultiplier = csPer1k != null ? csPer1k * 10 : null
+      const volumeMultiplier = csPer1k != null ? csPer1k * multiplier : null
       return (
         <div className="text-right font-medium text-xs">
           {volumeMultiplier != null ? volumeMultiplier.toFixed(2) : '—'}

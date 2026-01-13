@@ -9,7 +9,7 @@ import { LoaderCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import * as React from 'react'
 import { UsageDataTable } from '@/components/data-table/usage-data-table'
-import { usageColumns } from '@/components/data-table/usage-columns'
+import { createUsageColumns } from '@/components/data-table/usage-columns'
 import { Separator } from '@/components/ui/separator'
 
 type ExistingUsageData = {
@@ -42,6 +42,7 @@ const StoreUsagePage = () => {
   const { store, existingData } = usePage<StoreUsagePageProps>().props
   const [isParsing, setIsParsing] = React.useState(false)
   const [parsedData, setParsedData] = React.useState<ParsedPdfData | null>(null)
+  const [multiplier, setMultiplier] = React.useState(10)
 
   const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -147,7 +148,12 @@ const StoreUsagePage = () => {
                   </span>
                 </div>
                 {category.products.length > 0 ? (
-                  <UsageDataTable columns={usageColumns} data={category.products} />
+                  <UsageDataTable
+                    columns={createUsageColumns(multiplier)}
+                    data={category.products}
+                    multiplier={multiplier}
+                    onMultiplierChange={setMultiplier}
+                  />
                 ) : (
                   <p className="text-sm text-muted-foreground p-4">No products found</p>
                 )}
