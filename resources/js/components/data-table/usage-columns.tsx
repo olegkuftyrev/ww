@@ -119,27 +119,19 @@ export const createUsageColumns = (multiplier: number): ColumnDef<UsageProduct>[
   },
   {
     id: 'csPer1k',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="CS per 1k" className="justify-end" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="CS per 1k" />,
     cell: ({ row }) => {
       const average = row.getValue<number | null>('average')
       const conversion = row.original.conversion
       const avgNum = average != null ? Number(average) : null
       const convNum = conversion != null ? Number(conversion) : null
       const csPer1k = avgNum && convNum && convNum > 0 ? avgNum / convNum : null
-      return (
-        <div className="text-right font-mono text-sm font-semibold tabular-nums">
-          {csPer1k != null ? csPer1k.toFixed(2) : '—'}
-        </div>
-      )
+      return <div>{csPer1k != null ? csPer1k.toFixed(2) : '—'}</div>
     },
   },
   {
     id: 'volumeMultiplier',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Volume Multiplier" className="justify-end" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Volume Multiplier" />,
     cell: ({ row }) => {
       const average = row.getValue<number | null>('average')
       const conversion = row.original.conversion
@@ -147,11 +139,7 @@ export const createUsageColumns = (multiplier: number): ColumnDef<UsageProduct>[
       const convNum = conversion != null ? Number(conversion) : null
       const csPer1k = avgNum && convNum && convNum > 0 ? avgNum / convNum : null
       const volumeMultiplier = csPer1k != null ? csPer1k * multiplier : null
-      return (
-        <div className="text-right font-mono text-base font-bold tabular-nums">
-          {volumeMultiplier != null ? volumeMultiplier.toFixed(2) : '—'}
-        </div>
-      )
+      return <div>{volumeMultiplier != null ? volumeMultiplier.toFixed(2) : '—'}</div>
     },
   },
 ]

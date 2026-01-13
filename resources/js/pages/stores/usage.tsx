@@ -11,6 +11,7 @@ import * as React from 'react'
 import { UsageDataTable } from '@/components/data-table/usage-data-table'
 import { createUsageColumns } from '@/components/data-table/usage-columns'
 import { Separator } from '@/components/ui/separator'
+import { ColumnVisibilityToggle } from '@/components/ui/column-visibility-toggle'
 
 type ExistingUsageData = {
   uploadedAt: string
@@ -43,6 +44,16 @@ const StoreUsagePage = () => {
   const [isParsing, setIsParsing] = React.useState(false)
   const [parsedData, setParsedData] = React.useState<ParsedPdfData | null>(null)
   const [multiplier, setMultiplier] = React.useState(10)
+  const [columnVisibility, setColumnVisibility] = React.useState({
+    productNumber: false,
+    conversion: false,
+    unit: false,
+    w1: false,
+    w2: false,
+    w3: false,
+    w4: false,
+    average: false,
+  })
 
   const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -127,16 +138,55 @@ const StoreUsagePage = () => {
         </div>
 
         {existingData && (
-          <div className="space-y-4">
-            <div>
-              <Label className="text-2xl font-semibold">Current Usage Data</Label>
-              <p className="text-sm text-muted-foreground mt-1">
-                Last uploaded:{' '}
-                {new Date(existingData.uploadedAt).toLocaleString('en-US', {
-                  dateStyle: 'medium',
-                  timeStyle: 'short',
-                })}
-              </p>
+          <div className="space-y-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <Label className="text-2xl font-semibold">Current Usage Data</Label>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Last uploaded:{' '}
+                  {new Date(existingData.uploadedAt).toLocaleString('en-US', {
+                    dateStyle: 'medium',
+                    timeStyle: 'short',
+                  })}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">Multiplier:</span>
+                {[
+                  { label: '5k', value: 5 },
+                  { label: '10k', value: 10 },
+                  { label: '12k', value: 12 },
+                  { label: '40k', value: 40 },
+                  { label: '70k', value: 70 },
+                ].map((option) => (
+                  <Button
+                    key={option.value}
+                    variant={multiplier === option.value ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setMultiplier(option.value)}
+                    className="h-8"
+                  >
+                    {option.label}
+                  </Button>
+                ))}
+                <ColumnVisibilityToggle
+                  columnVisibility={columnVisibility}
+                  onColumnVisibilityChange={setColumnVisibility}
+                  columns={[
+                    { id: 'productNumber', label: 'Product #' },
+                    { id: 'productName', label: 'Product Name' },
+                    { id: 'conversion', label: 'Conversion' },
+                    { id: 'unit', label: 'Unit' },
+                    { id: 'w1', label: "W38 '25" },
+                    { id: 'w2', label: "W39 '25" },
+                    { id: 'w3', label: "W40 '25" },
+                    { id: 'w4', label: "W41 '25" },
+                    { id: 'average', label: 'AVG4' },
+                    { id: 'csPer1k', label: 'CS per 1k' },
+                    { id: 'volumeMultiplier', label: 'Volume Multiplier' },
+                  ]}
+                />
+              </div>
             </div>
 
             {existingData.categories.map((category, categoryIndex) => (
@@ -151,8 +201,8 @@ const StoreUsagePage = () => {
                   <UsageDataTable
                     columns={createUsageColumns(multiplier)}
                     data={category.products}
-                    multiplier={multiplier}
-                    onMultiplierChange={setMultiplier}
+                    columnVisibility={columnVisibility}
+                    onColumnVisibilityChange={setColumnVisibility}
                   />
                 ) : (
                   <p className="text-sm text-muted-foreground p-4">No products found</p>

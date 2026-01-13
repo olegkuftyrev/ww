@@ -3,7 +3,6 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
   type ColumnDef,
@@ -13,7 +12,6 @@ import {
 } from '@tanstack/react-table'
 
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import {
   Table,
   TableBody,
@@ -22,43 +20,23 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { DataTablePagination } from '@/components/ui/data-table-pagination'
-import { DataTableViewOptions } from '@/components/ui/data-table-view-options'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
-  multiplier: number
-  onMultiplierChange: (value: number) => void
+  columnVisibility?: VisibilityState
+  onColumnVisibilityChange?: (visibility: VisibilityState) => void
 }
 
 export function UsageDataTable<TData, TValue>({
   columns,
   data,
-  multiplier,
-  onMultiplierChange,
+  columnVisibility: externalColumnVisibility,
+  onColumnVisibilityChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
-    productNumber: false,
-    conversion: false,
-    unit: false,
-    w1: false,
-    w2: false,
-    w3: false,
-    w4: false,
-    average: false,
-  })
   const [rowSelection, setRowSelection] = React.useState({})
-
-  const multiplierOptions = [
-    { label: '5k', value: 5 },
-    { label: '10k', value: 10 },
-    { label: '12k', value: 12 },
-    { label: '40k', value: 40 },
-    { label: '70k', value: 70 },
-  ]
 
   const table = useReactTable({
     data,
@@ -66,43 +44,27 @@ export function UsageDataTable<TData, TValue>({
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
+    onColumnVisibilityChange: onColumnVisibilityChange,
     onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       columnFilters,
-      columnVisibility,
+      columnVisibility: externalColumnVisibility || {},
       rowSelection,
     },
   })
 
   return (
     <div className="w-full space-y-4">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center">
         <Input
           placeholder="Filter products..."
           value={(table.getColumn('productName')?.getFilterValue() as string) ?? ''}
           onChange={(event) => table.getColumn('productName')?.setFilterValue(event.target.value)}
           className="max-w-sm"
         />
-        <div className="ml-auto flex items-center gap-2">
-          <span className="text-sm font-medium">Multiplier:</span>
-          {multiplierOptions.map((option) => (
-            <Button
-              key={option.value}
-              variant={multiplier === option.value ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => onMultiplierChange(option.value)}
-              className="h-8"
-            >
-              {option.label}
-            </Button>
-          ))}
-          <DataTableViewOptions table={table} />
-        </div>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
@@ -142,7 +104,6 @@ export function UsageDataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />
     </div>
   )
 }
