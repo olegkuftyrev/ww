@@ -105,9 +105,9 @@ export function UsageDataTable<TData, TValue>({
 
                 const rowClassName =
                   variance === 'red'
-                    ? 'bg-red-50 border-l-4 border-l-red-500 hover:bg-red-100'
+                    ? '!bg-red-50 !border-l-4 !border-l-red-600 hover:!bg-red-100'
                     : variance === 'yellow'
-                      ? 'bg-yellow-50 border-l-4 border-l-yellow-500 hover:bg-yellow-100'
+                      ? '!bg-yellow-50 !border-l-4 !border-l-yellow-600 hover:!bg-yellow-100'
                       : ''
 
                 return (
