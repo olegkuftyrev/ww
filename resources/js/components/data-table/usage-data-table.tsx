@@ -40,7 +40,16 @@ export function UsageDataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
+    productNumber: false,
+    conversion: false,
+    unit: false,
+    w1: false,
+    w2: false,
+    w3: false,
+    w4: false,
+    average: false,
+  })
   const [rowSelection, setRowSelection] = React.useState({})
 
   const multiplierOptions = [
