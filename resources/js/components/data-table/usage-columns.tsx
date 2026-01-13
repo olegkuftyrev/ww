@@ -129,7 +129,7 @@ export const createUsageColumns = (multiplier: number): ColumnDef<UsageProduct>[
       const convNum = conversion != null ? Number(conversion) : null
       const csPer1k = avgNum && convNum && convNum > 0 ? avgNum / convNum : null
       return (
-        <div className="text-right font-medium text-xs">
+        <div className="text-right font-mono text-sm font-semibold tabular-nums">
           {csPer1k != null ? csPer1k.toFixed(2) : '—'}
         </div>
       )
@@ -148,7 +148,7 @@ export const createUsageColumns = (multiplier: number): ColumnDef<UsageProduct>[
       const csPer1k = avgNum && convNum && convNum > 0 ? avgNum / convNum : null
       const volumeMultiplier = csPer1k != null ? csPer1k * multiplier : null
       return (
-        <div className="text-right font-medium text-xs">
+        <div className="text-right font-mono text-base font-bold tabular-nums">
           {volumeMultiplier != null ? volumeMultiplier.toFixed(2) : '—'}
         </div>
       )
