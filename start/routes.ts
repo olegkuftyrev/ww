@@ -14,24 +14,14 @@ const RegisteredUsersController = () => import('#controllers/registered_users_co
 const ProfileController = () => import('#controllers/profile_controller')
 const UsersController = () => import('#controllers/users_controller')
 const StoresController = () => import('#controllers/stores_controller')
+const HomeController = () => import('#controllers/home_controller')
 
 // Web routes
-router.on('/').renderInertia('welcome').as('home')
+router.get('/', [HomeController, 'index']).as('home')
 router.group(() => {
   router.get('/login', [SessionController, 'create']).as('login')
   router.get('/register', [RegisteredUsersController, 'create']).as('register')
 })
-
-router
-  .group(() => {
-    router.get('/stores/:id', [StoresController, 'show']).as('stores.show')
-    router.get('/stores/:id/usage', [StoresController, 'usage']).as('stores.usage')
-    router.post('/stores/:id/usage/store', [StoresController, 'storeUsage']).as('stores.storeUsage')
-    router
-      .patch('/stores/:id/usage/products/:productId', [StoresController, 'updateProductWeek'])
-      .as('stores.updateProductWeek')
-  })
-  .use([middleware.auth()])
 
 router
   .group(() => {
@@ -45,11 +35,19 @@ router
 
 router
   .group(() => {
+    // Specific routes must come before parameterized routes
     router.get('/stores', [StoresController, 'index']).as('stores.index')
     router.get('/stores/create', [StoresController, 'create']).as('stores.create')
     router.post('/stores', [StoresController, 'store']).as('stores.store')
+    // Parameterized routes come after specific routes
+    router.get('/stores/:id', [StoresController, 'show']).as('stores.show')
     router.get('/stores/:id/edit', [StoresController, 'edit']).as('stores.edit')
     router.put('/stores/:id', [StoresController, 'update']).as('stores.update')
+    router.get('/stores/:id/usage', [StoresController, 'usage']).as('stores.usage')
+    router.post('/stores/:id/usage/store', [StoresController, 'storeUsage']).as('stores.storeUsage')
+    router
+      .patch('/stores/:id/usage/products/:productId', [StoresController, 'updateProductWeek'])
+      .as('stores.updateProductWeek')
     router.post('/stores/:id/users', [StoresController, 'attachUser']).as('stores.attachUser')
     router
       .post('/stores/:id/users/remove', [StoresController, 'detachUser'])

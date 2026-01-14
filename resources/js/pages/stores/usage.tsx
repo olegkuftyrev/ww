@@ -14,6 +14,14 @@ import { Separator } from '@/components/ui/separator'
 import { ColumnVisibilityToggle } from '@/components/ui/column-visibility-toggle'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 type ExistingUsageData = {
   uploadedAt: string
@@ -47,6 +55,7 @@ const StoreUsagePage = () => {
   const [parsedData, setParsedData] = React.useState<ParsedPdfData | null>(null)
   const [multiplier, setMultiplier] = React.useState(12)
   const [searchQuery, setSearchQuery] = React.useState('')
+  const [dataRefreshKey, setDataRefreshKey] = React.useState(0)
   const [columnVisibility, setColumnVisibility] = React.useState({
     productNumber: false,
     conversion: false,
@@ -57,6 +66,13 @@ const StoreUsagePage = () => {
     w4: false,
     average: false,
   })
+
+  // Update refresh key when existingData changes
+  React.useEffect(() => {
+    if (existingData) {
+      setDataRefreshKey((prev) => prev + 1)
+    }
+  }, [existingData])
 
   const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -247,6 +263,7 @@ const StoreUsagePage = () => {
                     </span>
                   </div>
                   <UsageDataTable
+                    key={`${categoryIndex}-${dataRefreshKey}`}
                     columns={createUsageColumns(multiplier, store.id)}
                     data={filteredProducts}
                     columnVisibility={columnVisibility}

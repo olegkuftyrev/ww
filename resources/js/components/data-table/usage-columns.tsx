@@ -28,7 +28,16 @@ interface EditableWeekCellProps {
 function EditableWeekCell({ initialValue, productId, weekField, storeId }: EditableWeekCellProps) {
   const [isEditing, setIsEditing] = React.useState(false)
   const [value, setValue] = React.useState(initialValue?.toString() || '')
+  const [isSaving, setIsSaving] = React.useState(false)
   const inputRef = React.useRef<HTMLInputElement>(null)
+  const saveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+
+  // Sync value with initialValue when it changes (after data reload)
+  React.useEffect(() => {
+    if (!isEditing && !isSaving) {
+      setValue(initialValue?.toString() || '')
+    }
+  }, [initialValue, isEditing, isSaving])
 
   React.useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -37,14 +46,32 @@ function EditableWeekCell({ initialValue, productId, weekField, storeId }: Edita
     }
   }, [isEditing])
 
+  // Cleanup timeout on unmount
+  React.useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [])
+
   const handleSave = async () => {
+    if (isSaving) return // Prevent multiple saves
+
     if (value === initialValue?.toString()) {
       setIsEditing(false)
       return
     }
 
     const numericValue = value ? parseFloat(value) : null
+    if (isNaN(numericValue as number) && numericValue !== null) {
+      toast.error('Invalid number')
+      setValue(initialValue?.toString() || '')
+      setIsEditing(false)
+      return
+    }
 
+    setIsSaving(true)
     const toastId = toast.loading('Saving...')
 
     router.patch(
@@ -54,22 +81,42 @@ function EditableWeekCell({ initialValue, productId, weekField, storeId }: Edita
       },
       {
         preserveScroll: true,
+        preserveState: true,
         onSuccess: () => {
           toast.success('Value updated! Average recalculated.', { id: toastId })
           setIsEditing(false)
+          setIsSaving(false)
+          // Reload only the existingData prop after editing is complete
+          // Use a delay to ensure the backend has processed the update
+          saveTimeoutRef.current = setTimeout(() => {
+            router.reload({ only: ['existingData'], preserveScroll: true, preserveState: true })
+          }, 500)
         },
         onError: (errors) => {
           toast.error('Failed to update value', { id: toastId })
           console.error(errors)
           setValue(initialValue?.toString() || '')
           setIsEditing(false)
+          setIsSaving(false)
         },
       }
     )
   }
 
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Only save if we're not clicking on another input
+    // This prevents saving when clicking between cells
+    const relatedTarget = e.relatedTarget as HTMLElement
+    if (relatedTarget && relatedTarget.tagName === 'INPUT') {
+      // User is clicking on another input, don't save yet
+      return
+    }
+    handleSave()
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
+      e.preventDefault()
       handleSave()
     } else if (e.key === 'Escape') {
       setValue(initialValue?.toString() || '')
@@ -85,8 +132,9 @@ function EditableWeekCell({ initialValue, productId, weekField, storeId }: Edita
         step="0.01"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        onBlur={handleSave}
+        onBlur={handleBlur}
         onKeyDown={handleKeyDown}
+        disabled={isSaving}
         className="h-7 w-20 text-right text-xs"
       />
     )
