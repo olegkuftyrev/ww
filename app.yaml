@@ -1,0 +1,72 @@
+# DigitalOcean App Platform Configuration
+# 
+# This file defines your application's infrastructure on DigitalOcean App Platform.
+# Deploy by connecting your GitHub repository to App Platform and specifying this file.
+#
+# Documentation: https://docs.digitalocean.com/products/app-platform/reference/app-spec/
+
+name: my-awesome-app
+region: nyc
+
+# Web service - your AdonisJS application
+services:
+  - name: api
+    github:
+      repo: your-username/your-repo-name
+      branch: main
+      deploy_on_push: true
+    
+    # Build configuration
+    build_command: pnpm install && pnpm build
+    run_command: node bin/server.js
+    
+    # Environment variables (set these in App Platform dashboard or here)
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3333"
+      - key: HOST
+        value: "0.0.0.0"
+      # Add other environment variables in App Platform dashboard:
+      # - APP_KEY (generate with: node ace generate:key)
+      # - DB_HOST (from managed database connection string)
+      # - DB_PORT
+      # - DB_USER
+      # - DB_PASSWORD
+      # - DB_DATABASE
+      # - SESSION_DRIVER
+      # - LOG_LEVEL
+    
+    # Instance configuration
+    instance_count: 1
+    instance_size_slug: basic-xxs  # Options: basic-xxs, basic-xs, basic-s, basic-m, etc.
+    min_instance_count: 1
+    max_instance_count: 3
+    
+    # Health checks
+    health_check:
+      http_path: /
+      initial_delay_seconds: 30
+      period_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+    
+    # HTTP settings
+    http_port: 3333
+    routes:
+      - path: /
+
+# Managed PostgreSQL database (optional - can be created in dashboard)
+databases:
+  - name: postgres-db
+    engine: PG
+    production: true
+    version: "15"
+    
+    # Database configuration
+    size_slug: db-s-dev-database  # Options: db-s-dev-database, db-s-db-s-1vcpu-1gb, etc.
+
+# Static assets (frontend build outputs)
+# Note: AdonisJS + Vite builds assets to public/assets, which is served by the API service
