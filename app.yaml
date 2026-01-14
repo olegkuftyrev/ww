@@ -17,7 +17,8 @@ services:
       deploy_on_push: true
     
     # Build configuration
-    build_command: pnpm install && pnpm build
+    # Install pnpm first, then install dependencies (including dev deps), then build
+    build_command: npm install -g pnpm@8 && pnpm install --frozen-lockfile && pnpm build
     run_command: node bin/server.js
     
     # Environment variables (set these in App Platform dashboard or here)

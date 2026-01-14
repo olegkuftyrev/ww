@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "license": "MIT",
+  "packageManager": "pnpm@8.15.0",
   "scripts": {
     "start": "node bin/server.js",
     "build": "node ace build",
