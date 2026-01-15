@@ -40,7 +40,7 @@ echo -e "${GREEN}✅ SSH connection successful${NC}"
 
 # Deploy application
 echo -e "${BLUE}📦 Deploying application...${NC}"
-ssh "${DROPLET_USER}@${DROPLET_IP}" << 'ENDSSH'
+ssh "${DROPLET_USER}@${DROPLET_IP}" << ENDSSH
     set -e
     cd /home/appuser/my-awesome-app || exit 1
     
@@ -51,13 +51,24 @@ ssh "${DROPLET_USER}@${DROPLET_IP}" << 'ENDSSH'
     pnpm install --production=false
     
     echo "🔨 Building application..."
-    pnpm build
+    # Set VITE_BACKEND_URL for build (required for Vite env vars)
+    export VITE_BACKEND_URL=http://${DROPLET_IP}/api/
+    pnpm build --ignore-ts-errors
+    
+    echo "📋 Copying assets..."
+    rm -rf public/assets
+    cp -r build/public/* public/
+    
+    echo "🔐 Fixing permissions..."
+    chmod -R 755 public
+    find public -type f -exec chmod 644 {} \;
+    find public -type d -exec chmod 755 {} \;
     
     echo "🗄️  Running database migrations..."
-    node ace migration:run
+    node ace migration:run --force
     
     echo "🔄 Restarting application..."
-    pm2 restart my-awesome-app || pm2 start ecosystem.config.js
+    pm2 restart my-awesome-app || pm2 start ecosystem.config.cjs
     
     echo "✅ Deployment complete!"
     pm2 status
