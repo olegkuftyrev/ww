@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { API_BASE_URL, USER_KEY } from './constants'
-import { LOGIN_ROUTE } from '@/app/routes'
 
 const snakeToCamel = (str: string): string =>
   str.replace(/([-_][a-z])/g, (group) => group.toUpperCase().replace('-', '').replace('_', ''))
@@ -64,9 +63,9 @@ axiosInstance.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem(USER_KEY)
-      const searchParams = new URLSearchParams()
+      const searchParams = new URLSearchParams(window.location.search)
       const redirectTo = searchParams.get('redirectTo')
-      window.location.href = `${LOGIN_ROUTE}?redirectTo=${redirectTo}`
+      window.location.href = `/auth/login${redirectTo ? `?redirectTo=${redirectTo}` : ''}`
     }
 
     return Promise.reject(error)
