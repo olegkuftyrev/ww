@@ -364,7 +364,34 @@ pnpm build
 node ace migration:run
 ```
 
-#### 3.6. Test Application
+#### 3.6. Create Admin User
+
+Create an admin account for testing:
+
+```bash
+# Create admin user (will prompt for password)
+node ace create:admin admin@example.com
+
+# Or with password directly
+node ace create:admin admin@example.com your-secure-password
+
+# With name
+node ace create:admin admin@example.com your-secure-password --name="Admin User"
+```
+
+The command will:
+- Create a new user with admin role
+- Set status to 'active'
+- Automatically hash the password
+- If user already exists, it will ask if you want to update them to admin
+
+**Example:**
+```bash
+node ace create:admin admin@yourdomain.com
+# Enter password when prompted
+```
+
+#### 3.7. Test Application
 
 ```bash
 # Test if the application starts
